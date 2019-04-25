@@ -29,6 +29,11 @@ public:
 //!	x, y and z coordinates of the node
 	double XYZ[NDF];
 
+//! {xx, yy, zz, xy, xz, xz} for nodal stress
+	double Stress[6];
+
+	unsigned int count;
+
 //!	Boundary code of each degree of freedom of the node
 /*!		0: The corresponding degree of freedom is active (defined in the global system) */
 /*!		1: The corresponding degree of freedom in nonactive (not defined) */
@@ -50,4 +55,7 @@ public:
 
 //!	Write nodal displacement
 	void WriteNodalDisplacement(COutputter& OutputFile, unsigned int np, double* Displacement);
+
+//! Set nodal stress to 0 for every LOAD CASE
+	void ResetNodalStress();
 };

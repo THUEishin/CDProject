@@ -17,6 +17,9 @@ using namespace std;
 
 template <class type> void clear( type* a, unsigned int N );	// Clear an array
 
+//! Guass Point function
+void Guassian(unsigned int Num, double* GP, double* weight);
+
 //!	Element base class
 /*!	All type of element classes should be derived from this base class */
 class CElement

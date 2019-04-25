@@ -57,6 +57,9 @@ public:
 //!	Output bar element data
 	void PrintBarElementData(unsigned int EleGrp);
 
+//!	Output quadratic element data
+	void PrintQuadElementData(unsigned int EleGrp);
+
 //!	Output load data 
 	void OutputLoadInfo(); 
 
@@ -65,6 +68,9 @@ public:
 
 //!	Output element stresses 
 	void OutputElementStress();
+
+//! Output nodal stress
+	void OutputNodalStress();
 
 //!	Print total system data
 	void OutputTotalSystemData();

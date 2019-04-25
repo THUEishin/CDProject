@@ -149,7 +149,7 @@ void COutputter::OutputElementInfo()
 		*this << " ELEMENT TYPE  . . . . . . . . . . . . .( NPAR(1) ) . . =" << setw(5)
 			  << ElementType << endl;
 		*this << "     EQ.1, TRUSS ELEMENTS" << endl
-			  << "     EQ.2, ELEMENTS CURRENTLY" << endl
+			  << "     EQ.2, QUADRILATERAL ELEMENTS" << endl
 			  << "     EQ.3, NOT AVAILABLE" << endl
 			  << endl;
 
@@ -161,6 +161,9 @@ void COutputter::OutputElementInfo()
 		{
 			case ElementTypes::Bar: // Bar element
 				PrintBarElementData(EleGrp);
+				break;
+			case ElementTypes::Q4:	// Quadratic element
+				PrintQuadElementData(EleGrp);
 				break;
 		}
 	}
@@ -195,6 +198,46 @@ void COutputter::PrintBarElementData(unsigned int EleGrp)
 		  << " E L E M E N T   I N F O R M A T I O N" << endl;
 	*this << " ELEMENT     NODE     NODE       MATERIAL" << endl
 		  << " NUMBER-N      I        J       SET NUMBER" << endl;
+
+	unsigned int NUME = ElementGroup.GetNUME();
+
+	//	Loop over for all elements in group EleGrp
+	for (unsigned int Ele = 0; Ele < NUME; Ele++)
+		ElementGroup[Ele].Write(*this, Ele);
+
+	*this << endl;
+}
+
+//	Output quadratic element data
+void COutputter::PrintQuadElementData(unsigned int EleGrp)
+{
+	CDomain* FEMData = CDomain::Instance();
+
+	CElementGroup& ElementGroup = FEMData->GetEleGrpList()[EleGrp];
+	unsigned int NUMMAT = ElementGroup.GetNUMMAT();
+
+	*this << " M A T E R I A L   D E F I N I T I O N" << endl
+		<< endl;
+	*this << " NUMBER OF DIFFERENT SETS OF MATERIAL" << endl;
+	*this << " AND CROSS-SECTIONAL  CONSTANTS  . . . .( NPAR(3) ) . . =" << setw(5) << NUMMAT
+		<< endl
+		<< endl;
+
+	*this << "  SET       YOUNG'S      POISSON" << endl
+		<< " NUMBER     MODULUS        RATE" << endl
+		<< "               E              NU" << endl;
+
+	*this << setiosflags(ios::scientific) << setprecision(5);
+
+	//	Loop over for all property sets
+	for (unsigned int mset = 0; mset < NUMMAT; mset++)
+		ElementGroup.GetMaterial(mset).Write(*this, mset);
+
+	*this << endl
+		<< endl
+		<< " E L E M E N T   I N F O R M A T I O N" << endl;
+	*this << " ELEMENT     NODE     NODE     NODE     NODE       MATERIAL" << endl
+		<< " NUMBER-N     I        J        K        L        SET NUMBER" << endl;
 
 	unsigned int NUME = ElementGroup.GetNUME();
 
@@ -298,6 +341,79 @@ void COutputter::OutputElementStress()
 				cerr << "*** Error *** Elment type " << ElementType
 					<< " has not been implemented.\n\n";
 		}
+	}
+}
+
+//  Calculate Nodal Stress
+void COutputter::OutputNodalStress()
+{
+	CDomain* FEMData = CDomain::Instance();
+	unsigned int NUMNP = FEMData->GetNUMNP();
+	CNode* NodeList = FEMData->GetNodeList();
+
+	double* Displacement = FEMData->GetDisplacement();
+
+	unsigned int NUMEG = FEMData->GetNUMEG();
+
+	*this << " N O D A L  S T R E S S  C A L C U L A T I O N S"
+		<< endl
+		<< endl;
+
+	for (unsigned int Np = 0; Np < NUMNP; Np++)
+	{
+		NodeList[Np].ResetNodalStress();
+	}
+
+	for (unsigned int EleGrpIndex = 0; EleGrpIndex < NUMEG; EleGrpIndex++)
+	{
+		CElementGroup& EleGrp = FEMData->GetEleGrpList()[EleGrpIndex];
+		unsigned int NUME = EleGrp.GetNUME();
+		ElementTypes ElementType = EleGrp.GetElementType();
+
+
+		switch (ElementType)
+		{
+		case ElementTypes::Bar: // Bar element
+			double stress;
+
+			for (unsigned int Ele = 0; Ele < NUME; Ele++)
+			{
+				CElement& Element = EleGrp[Ele];
+				Element.ElementStress(&stress, Displacement);
+			}
+
+			break;
+
+		case ElementTypes::Q4: // Bar element
+			double stressQuad[12];
+
+			for (unsigned int Ele = 0; Ele < NUME; Ele++)
+			{
+				CElement& Element = EleGrp[Ele];
+				Element.ElementStress(stressQuad, Displacement);
+			}
+
+			break;
+
+		default: // Invalid element type
+			cerr << "*** Error *** Elment type " << ElementType
+				<< " has not been implemented.\n\n";
+		}
+	}
+
+	*this << "  NODE               STRESS            STRESS            STRESS            STRESS            STRESS            STRESS" << endl
+		<<   "  NUMBER               XX                YY                ZZ                XY                XZ                YZ" << endl;
+
+//! Average SPR Method
+	for (unsigned int Np = 0; Np < NUMNP; Np++)
+	{
+		unsigned int count = NodeList[Np].count;
+		*this << setw(5) << Np + 1 << setw(22) << NodeList[Np].Stress[0]/count;
+		for (int i = 1; i < 6; i++)
+		{
+			*this << setw(18) << NodeList[Np].Stress[i]/count;
+		}
+		*this << endl;
 	}
 }
 

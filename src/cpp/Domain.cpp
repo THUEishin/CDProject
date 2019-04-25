@@ -20,6 +20,36 @@ template <class type> void clear( type* a, unsigned int N )
 		a[i] = 0;
 }
 
+//! Guass Point function
+void Guassian(unsigned int Num, double* GP, double* weight)
+{
+	switch (Num)
+	{
+	case 1:
+		GP[0] = 0.0;
+		weight[0] = 2.0;
+		break;
+	case 2:
+		GP[0] = -0.5773502692;
+		GP[1] = 0.5773502692;
+		weight[0] = 1.0;
+		weight[1] = 1.0;
+		break;
+	case 3:
+		GP[0] = -0.7745966692;
+		GP[1] = 0.0;
+		GP[2] = 0.7745966692;
+		weight[0] = 0.5555555556;
+		weight[1] = 0.8888888889;
+		weight[2] = 0.5555555556;
+		break;
+	default:
+		cout << "There is no implementation of Guass Quadrature of " << Num << " Guass Points" << endl;
+		exit(1);
+		break;
+	}
+}
+
 CDomain* CDomain::_instance = nullptr;
 
 //	Constructor

@@ -18,6 +18,11 @@ CNode::CNode(double X, double Y, double Z)
     XYZ[0] = X;		// Coordinates of the node
     XYZ[1] = Y;
     XYZ[2] = Z;
+
+	for (int i = 0; i < 6; i++)
+		Stress[i] = 0.0;
+
+	count = 0;
     
     bcode[0] = 0;	// Boundary codes
     bcode[1] = 0;
@@ -85,4 +90,13 @@ void CNode::WriteNodalDisplacement(COutputter& output, unsigned int np, double* 
 	}
 
 	output << endl;
+}
+
+//  Set nodal stress to 0 for every LOAD CASE
+void CNode::ResetNodalStress()
+{
+	for (int i = 0; i < 6; i++)
+		Stress[i] = 0.0;
+
+	count = 0;
 }
