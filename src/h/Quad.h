@@ -29,6 +29,9 @@ public:
 	//!	Write element data to stream
 	virtual void Write(COutputter& output, unsigned int Ele);
 
+	//!	Write element data to Tecplot stream
+	virtual void Write(CTecOutputter& output);
+
 	//! Generate location matrix: the global equation number that corresponding to each DOF of the element
 	//	Caution:  Equation number is numbered from 1 !
 	virtual void GenerateLocationMatrix();

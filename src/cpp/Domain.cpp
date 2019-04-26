@@ -109,10 +109,12 @@ bool CDomain::ReadData(string FileName, string OutFile)
 	}
 
 	COutputter* Output = COutputter::Instance(OutFile);
+	CTecOutputter* TecOutput = CTecOutputter::Instance();
 
 //	Read the heading line
 	Input.getline(Title, 256);
 	Output->OutputHeading();
+	TecOutput->OutputHeading();
 
 //	Read the control line
 	Input >> NUMNP >> NUMEG >> NLCASE >> MODEX;
@@ -139,6 +141,7 @@ bool CDomain::ReadData(string FileName, string OutFile)
     else
         return false;
 
+	TecOutput->OutputInitInfo();
 	return true;
 }
 
@@ -200,6 +203,16 @@ bool CDomain::ReadElements()
         if (!EleGrpList[EleGrp].Read(Input))
             return false;
     
+//! If it is a 2D problem, then the first group of element should be a 2D Element Type
+//! Currently the 2D Element Types are: Q4
+	if (EleGrpList[0].GetElementType() == ElementTypes::Q4)
+	{
+		PTYPE = 0;
+	}
+	else
+	{
+		PTYPE = 1;
+	}
     return true;
 }
 
