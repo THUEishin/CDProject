@@ -67,6 +67,14 @@ void CBar::Write(COutputter& output, unsigned int Ele)
 		   << setw(9) << nodes_[1]->NodeNumber << setw(12) << ElementMaterial_->nset << endl;
 }
 
+//	Write element data to stream
+void CBar::Write(CTecOutputter& output)
+{
+	//! Brick degrades to 3D Bar with 7 same node
+	output << nodes_[0]->NodeNumber << " " << nodes_[1]->NodeNumber << " " << nodes_[1]->NodeNumber << " " << nodes_[1]->NodeNumber << " "
+		<< nodes_[1]->NodeNumber << " " << nodes_[1]->NodeNumber << " " << nodes_[1]->NodeNumber << " " << nodes_[1]->NodeNumber << endl;
+}
+
 //  Generate location matrix: the global equation number that corresponding to each DOF of the element
 //	Caution:  Equation number is numbered from 1 !
 void CBar::GenerateLocationMatrix()

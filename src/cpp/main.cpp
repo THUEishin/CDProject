@@ -11,6 +11,7 @@
 #include "Domain.h"
 #include "Bar.h"
 #include "Outputter.h"
+#include "TecOutputter.h"
 #include "Clock.h"
 
 using namespace std;
@@ -40,8 +41,10 @@ int main(int argc, char *argv[])
 
     string InFile = filename + ".dat";
 	string OutFile = filename + ".out";
+	string TecOutFile = filename + "result.dat";
 
 	CDomain* FEMData = CDomain::Instance();
+	CTecOutputter* TecOutput = CTecOutputter::Instance(TecOutFile);
 
     Clock timer;
     timer.Start();
@@ -93,6 +96,12 @@ int main(int argc, char *argv[])
         Output->OutputNodalDisplacement(lcase);
 
 		Output->OutputNodalStress();
+
+		//! Write result to Tecplot file in initial phase
+		TecOutput->OutputResult(1, lcase);
+
+		//! Write result to Tecplot file in deformed phase
+		TecOutput->OutputResult(2, lcase);
     }
 
     double time_solution = timer.ElapsedTime();

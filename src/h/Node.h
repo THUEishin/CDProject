@@ -11,6 +11,7 @@
 #pragma once
 
 #include "Outputter.h"
+#include "TecOutputter.h"
 
 using namespace std;
 
@@ -49,6 +50,9 @@ public:
 
 //!	Output nodal point data to stream
 	void Write(COutputter& output, unsigned int np);
+
+//!	Output nodal point data to Tecplot stream
+	void Write(CTecOutputter& output, unsigned int PTYPE, unsigned int flag = 0, double* Displacement = nullptr);
 
 //!	Output equation numbers of nodal point to stream OutputFile
 	void WriteEquationNo(COutputter& OutputFile, unsigned int np);

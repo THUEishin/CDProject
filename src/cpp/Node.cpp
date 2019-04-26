@@ -59,6 +59,75 @@ void CNode::Write(COutputter& output, unsigned int np)
 		   << setw(18) << XYZ[0] << setw(15) << XYZ[1] << setw(15) << XYZ[2] << endl;
 }
 
+//	Output nodal point data to Tecplot stream
+void CNode::Write(CTecOutputter& output, unsigned int PTYPE, unsigned int flag,double* Displacement)
+{
+	//! flag: 0-nodal position of Initial phase
+	//!       1-nodal position of initial phase after calculation
+	//!       2-nodal position of deformed phase after calculation
+	//! Displacement = nullptr before calculation
+	double UXYZ[NDF];
+	for (unsigned int i = 0; i < NDF; i++) UXYZ[i] = 0.0;
+
+	if (Displacement)
+	{
+		for (unsigned int j = 0; j < NDF; j++)
+		{
+			if (bcode[j] == 0)
+			{
+				UXYZ[j] = 0.0;
+			}
+			else
+			{
+				UXYZ[j] = Displacement[bcode[j] - 1];
+			}
+		}
+	}
+
+	if (PTYPE)
+	{
+		if(flag == 0)
+			output << XYZ[0] << " " << XYZ[1] << " " << XYZ[2] <<" ";
+		else if(flag == 2)
+		{
+			if (!Displacement)
+			{
+				cout << "***Error*** Can not write nodal position of deformed phase before calculation" << endl;
+				exit(1);
+			}
+			
+			output << XYZ[0] + UXYZ[0] << " " << XYZ[1] + UXYZ[1] << " " << XYZ[2] + UXYZ[2] << " ";
+		}
+
+		for (unsigned int i = 0; i < NDF; i++) output<< UXYZ[i] << " ";
+
+		for (unsigned int i = 0; i < 6; i++) output << Stress[i] << " ";
+
+		output << endl;
+	}
+	else
+	{
+		if (flag == 0)
+			output << XYZ[0] << " " << XYZ[1] << " ";
+		else if(flag == 2)
+		{
+			if (!Displacement)
+			{
+				cout << "***Error*** Can not write nodal position of deformed phase before calculation" << endl;
+				exit(1);
+			}
+
+			output << XYZ[0] + UXYZ[0] << " " << XYZ[1] + UXYZ[1] << " ";
+		}
+
+		for (unsigned int i = 0; i < 2; i++) output << UXYZ[i] << " ";
+
+		output << Stress[0] << " " << Stress[1] << " " << Stress[3] << " ";
+
+		output << endl;
+	}
+}
+
 //	Output equation numbers of nodal point to stream
 void CNode::WriteEquationNo(COutputter& output, unsigned int np)
 {

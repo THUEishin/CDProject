@@ -13,6 +13,7 @@
 #include "Node.h"
 #include "ElementGroup.h"
 #include "Outputter.h"
+#include "TecOutputter.h"
 #include "Solver.h"
 #include "LoadCaseData.h"
 #include "SkylineMatrix.h"
@@ -41,6 +42,11 @@ private:
 /*!		0 : Data check only;
 		1 : Execution */
 	unsigned int MODEX;
+
+//!	Problem type: PTYPE (used for Tecplot output)
+/*!		0 : 2D XY-plain problem;
+		1 : 3D problem */
+	unsigned int PTYPE;
 
 //!	Total number of nodal points
 	unsigned int NUMNP;
@@ -117,6 +123,9 @@ public:
 
 //!	Return solution mode
 	inline unsigned int GetMODEX() { return MODEX; }
+
+//!	Return problem type
+	inline unsigned int GetPTYPE() { return PTYPE; }
 
 //!	Return the title of problem
 	inline string GetTitle() { return Title; }
