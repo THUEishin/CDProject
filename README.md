@@ -10,3 +10,4 @@ The project for the course 'Computational Dynamics'. This README.md is used to r
 
 ### Modification by Jia sun 
 #### Date: 2019/4/27
+1.Add
