@@ -9,4 +9,5 @@ The project for the course 'Computational Dynamics'. This README.md is used to r
 3. Postproccess phase for [Tecplot](https://www.tecplot.com/) Display.
 
 
-### Modification by Jia sun
+### Modification by Jia sun 
+#### Date: 2019/4/27
