@@ -61,6 +61,11 @@ bool CQuad::Read(ifstream& Input, unsigned int Ele, CMaterial* MaterialSets, CNo
 	nodes_[2] = &NodeList[N3 - 1];
 	nodes_[3] = &NodeList[N4 - 1];
 
+	for (int i = 0; i < 4; i++)
+	{
+		nodes_[i]->Tec_flag = true;
+	}
+
 	return true;
 }
 
@@ -74,7 +79,7 @@ void CQuad::Write(COutputter& output, unsigned int Ele)
 //	Write element data to stream
 void CQuad::Write(CTecOutputter& output)
 {
-	output << nodes_[0]->NodeNumber << " " << nodes_[1]->NodeNumber << " " << nodes_[2]->NodeNumber << " " << nodes_[3]->NodeNumber << endl;
+	output << nodes_[0]->NodeTecNumber << " " << nodes_[1]->NodeTecNumber << " " << nodes_[2]->NodeTecNumber << " " << nodes_[3]->NodeTecNumber << endl;
 }
 
 //  Generate location matrix: the global equation number that corresponding to each DOF of the element

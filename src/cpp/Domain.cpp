@@ -219,6 +219,17 @@ bool CDomain::ReadElements()
 	{
 		PTYPE = 1;
 	}
+
+	int count = 0;
+	for (unsigned int N = 0; N < NUMNP; N++)
+	{
+		if (NodeList[N].Tec_flag)
+		{
+			count++;
+			NodeList[N].NodeTecNumber = count;
+		}
+	}
+
     return true;
 }
 
