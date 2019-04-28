@@ -8,18 +8,18 @@
 /*     Date: April 27, 2019                                                  */
 /*****************************************************************************/
 
-template <class T>
+
 class CSparseMatrix
 {
 private:
 	//! Gloabl Stiffness Matrix
-	T* _K;	
+	double* _K;	
 
 	//! Row index
-	unsigned int* _iK;	
+	int* _iK;	
 
 	//! Coloumn index
-	unsigned int* _jK;	
+	int* _jK;	
 
 	//! Dimension of the stiffness matrix
 	unsigned int NEQ_;
@@ -39,4 +39,9 @@ public:
 
 	//! Return Total number of non-zero elements in the stiffness matrix
 	inline unsigned int GetNNZ() { return NNZ_; }
+
+	//! Assemble the element stiffness matrix to the global stiffness matrix
+	void Assembly(double* Matrix, unsigned int* LocationMatrix, size_t ND);
+
+	friend class CPARDISOSolver;
 };

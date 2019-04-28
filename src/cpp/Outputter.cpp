@@ -408,10 +408,12 @@ void COutputter::OutputNodalStress()
 	for (unsigned int Np = 0; Np < NUMNP; Np++)
 	{
 		unsigned int count = NodeList[Np].count;
-		*this << setw(5) << Np + 1 << setw(22) << NodeList[Np].Stress[0]/count;
+		NodeList[Np].Stress[0] /= count;
+		*this << setw(5) << Np + 1 << setw(22) << NodeList[Np].Stress[0];
 		for (int i = 1; i < 6; i++)
 		{
-			*this << setw(18) << NodeList[Np].Stress[i]/count;
+			NodeList[Np].Stress[i] /= count;
+			*this << setw(18) << NodeList[Np].Stress[i];
 		}
 		*this << endl;
 	}

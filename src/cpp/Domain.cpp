@@ -120,7 +120,10 @@ bool CDomain::ReadData(string FileName, string OutFile)
 	TecOutput->OutputHeading();
 
 //	Read the control line
-	Input >> NUMNP >> NUMEG >> NLCASE >> MODEX >> STYPE;
+	Input >> NUMNP >> NUMEG >> NLCASE >> MODEX;
+
+	if (MODEX == 1) STYPE = 0;
+	else if(MODEX == 2) STYPE = 1;
 
 //	Read nodal point data
 	if (ReadNodalPoints())
@@ -264,7 +267,17 @@ void CDomain::AssembleStiffnessMatrix()
         {
             CElement& Element = ElementGrp[Ele];
             Element.ElementStiffness(Matrix);
-            StiffnessMatrix->Assembly(Matrix, Element.GetLocationMatrix(), Element.GetND());
+			if (STYPE)
+			{
+				//! For Skyline storage method, the LM is calculated in CalculateColumnHeights
+				//! For Sparse storage method, we should generate LM for the first time here
+				Element.GenerateLocationMatrix();
+				SparseStiffnessMatrix->Assembly(Matrix, Element.GetLocationMatrix(), Element.GetND());
+			}
+			else
+			{
+				StiffnessMatrix->Assembly(Matrix, Element.GetLocationMatrix(), Element.GetND());
+			}
         }
 
 		delete[] Matrix;
@@ -308,7 +321,7 @@ void CDomain::AllocateMatrices()
 
 	if (STYPE)
 	{
-		SparseStiffnessMatrix = new CSparseMatrix<double>();
+		SparseStiffnessMatrix = new CSparseMatrix();
 	}
 	else
 	{

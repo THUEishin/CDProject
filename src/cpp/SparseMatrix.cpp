@@ -1,12 +1,12 @@
 #include "../h/SparseMatrix.h"
+#include <algorithm>
 #include "../h/Domain.h"
 #include <vector>
 
 using namespace std;
 
 //! constructors
-template <class T>
-CSparseMatrix<T>::CSparseMatrix()
+CSparseMatrix::CSparseMatrix()
 {
 	CDomain* FEMData = CDomain::Instance();
 	unsigned int NUMNP = FEMData->GetNUMNP();
@@ -19,7 +19,7 @@ CSparseMatrix<T>::CSparseMatrix()
 	vector<int> node_c_freedom;
 	vector<vector<int>> freedom_c_freedom;
 
-	_iK = new unsigned int[NEQ_ + 1];
+	_iK = new int[NEQ_ + 1];
 	_iK[0] = 1;
 	freedom_c_freedom.resize(NEQ_);
 
@@ -49,7 +49,7 @@ CSparseMatrix<T>::CSparseMatrix()
 	}
 
 //! Calculate freedom_c_freedom
-	for (unsigned int N; N < NUMNP; N++)
+	for (unsigned int N = 0; N < NUMNP; N++)
 	{
 		unsigned int NDF = CNode::NDF;
 		unsigned int flag= 0;
@@ -99,7 +99,7 @@ CSparseMatrix<T>::CSparseMatrix()
 			int num_connected_node = node_c_node.size();
 			for (int N = 0; N < num_connected_node; N++)
 			{
-				int node_id = node_c_node[j] - 1;
+				int node_id = node_c_node[N] - 1;
 				for (unsigned int k = 0; k < NDF; k++)
 				{
 					if (nodelist[node_id].bcode[k] > 0)
@@ -148,16 +148,74 @@ CSparseMatrix<T>::CSparseMatrix()
 	NNZ_ = non_zero;
 
 	//Allocate _K
-	_K = new T[NNZ_];
+	_K = new double[NNZ_];
 	for (int i = 0; i < NNZ_; i++)
-		_K[i] = T(0);
+		_K[i] = 0.0;
 }
 
 //! deconstructor
-template <class T>
-CSparseMatrix<T>::~CSparseMatrix()
+CSparseMatrix::~CSparseMatrix()
 {
 	delete[] _K;
 	delete[] _iK;
 	delete[] _jK;
+}
+
+//! Assemble the element stiffness matrix to the global stiffness matrix
+void CSparseMatrix::Assembly(double* Matrix, unsigned int* LocationMatrix, size_t ND)
+{
+	//  Assemble global stiffness matrix
+	for (unsigned int j = 0; j < ND; j++)
+	{
+		unsigned int Lj = LocationMatrix[j];    // Global equation number corresponding to jth DOF of the element
+		if (!Lj)
+			continue;
+
+		//      Address of diagonal element of column j in the one dimensional element stiffness matrix
+		unsigned int DiagjElement = (j + 1)*j / 2 + 1;
+
+		for (unsigned int i = 0; i <= j; i++)
+		{
+			int flag = 0;
+			if (i == 5 && j == 6)
+				int adsg = 0;
+			unsigned int Li = LocationMatrix[i];    // Global equation number corresponding to ith DOF of the element
+
+			if (!Li)
+				continue;
+
+			if (Li > Lj)
+			{
+				int temp = Li;
+				Li = Lj;
+				Lj = temp;
+				flag = 1;
+			}
+			
+			int row_begin = _iK[Li - 1];
+			int row_begin_next = _iK[Li];
+			int pos_kij = -1;
+			for (int n = row_begin - 1; n < row_begin_next - 1; n++)
+			{
+				if (_jK[n] == Lj)
+				{
+					pos_kij = n;
+					break;
+				}
+			}
+			
+			if (pos_kij == -1)
+			{
+				cout << "Error: Kij is not in _jK in calling assmeble_stifness" << endl;
+				exit(1);
+			}
+
+			_K[pos_kij] += Matrix[DiagjElement + j - i - 1];
+			
+			if (flag)
+			{
+				Lj = Li;
+			}
+		}
+	}
 }

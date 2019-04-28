@@ -85,7 +85,7 @@ private:
     CSkylineMatrix<double>* StiffnessMatrix;
 
 //! Sparse stiffness matrix
-	CSparseMatrix<double>* SparseStiffnessMatrix;
+	CSparseMatrix* SparseStiffnessMatrix;
 
 //!	Global nodal force/displacement vector
 	double* Force;
@@ -176,6 +176,6 @@ public:
 	inline CSkylineMatrix<double>* GetStiffnessMatrix() { return StiffnessMatrix; }
 
 //!	Return pointer to the sparse stiffness matrix
-	inline CSparseMatrix<double>* GetSparseStiffnessMatrix() { return SparseStiffnessMatrix; }
+	inline CSparseMatrix* GetSparseStiffnessMatrix() { return SparseStiffnessMatrix; }
 
 };
