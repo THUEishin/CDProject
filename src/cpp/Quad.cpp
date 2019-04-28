@@ -168,13 +168,13 @@ void CQuad::ElementStress(double* stress, double* Displacement)
 	}
 
 	double str[3];
-	str[0] = stress[0] + stress[3] + stress[6] + stress[9];
-	str[1] = stress[1] + stress[4] + stress[7] + stress[10];
-	str[2] = stress[2] + stress[5] + stress[8] + stress[11];
+	str[0] = stress[0] + stress[3] + stress[6] + stress[9];		// stress xx
+	str[1] = stress[1] + stress[4] + stress[7] + stress[10];	// stress yy
+	str[2] = stress[2] + stress[5] + stress[8] + stress[11];	// stress xy
 
 	for (unsigned int N = 0; N < NEN_; N++)
 	{
-		nodes_[N]->count += 4;
+		nodes_[N]->count += 4;				// 4 is the number of Gauss Point in an element
 		nodes_[N]->Stress[0] += str[0];		// stress xx
 		nodes_[N]->Stress[1] += str[1];		// stress yy
 		nodes_[N]->Stress[3] += str[3];		// stress xy

@@ -461,10 +461,12 @@ void COutputter::OutputNodalStress()
 	for (unsigned int Np = 0; Np < NUMNP; Np++)
 	{
 		unsigned int count = NodeList[Np].count;
-		*this << setw(5) << Np + 1 << setw(22) << NodeList[Np].Stress[0]/count;
+		NodeList[Np].Stress[0] /= count;
+		*this << setw(5) << Np + 1 << setw(22) << NodeList[Np].Stress[0];
 		for (int i = 1; i < 6; i++)
 		{
-			*this << setw(18) << NodeList[Np].Stress[i]/count;
+			NodeList[Np].Stress[i] /= count;
+			*this << setw(18) << NodeList[Np].Stress[i];
 		}
 		*this << endl;
 	}
@@ -476,17 +478,40 @@ void COutputter::OutputTotalSystemData()
 	CDomain* FEMData = CDomain::Instance();
 
 	*this << "	TOTAL SYSTEM DATA" << endl
-		  << endl;
+		<< endl;
 
-	*this << "     NUMBER OF EQUATIONS . . . . . . . . . . . . . .(NEQ) = " << FEMData->GetNEQ()
-		  << endl
-		  << "     NUMBER OF MATRIX ELEMENTS . . . . . . . . . . .(NWK) = " << FEMData->GetStiffnessMatrix()->size()
-		  << endl
-		  << "     MAXIMUM HALF BANDWIDTH  . . . . . . . . . . . .(MK ) = " << FEMData->GetStiffnessMatrix()->GetMaximumHalfBandwidth()
-		  << endl
-		  << "     MEAN HALF BANDWIDTH . . . . . . . . . . . . . .(MM ) = " << FEMData->GetStiffnessMatrix()->size() / FEMData->GetNEQ() << endl
-		  << endl
-		  << endl;
+	if (FEMData->GetSTYPE())
+	{
+		*this << "     STORAGE OF STIFFNESS MATRIX . . . . . . . . . . . .  = " << FEMData->GetSTYPE()
+			<< endl
+			<< "         EQ.0, SKYLINE STORAGE METHOD"
+			<< endl
+			<< "         EQ.1, PARDISO STORAGE METHOD"
+			<< endl
+			<< "     NUMBER OF EQUATIONS . . . . . . . . . . . . . .(NEQ) = " << FEMData->GetNEQ()
+			<< endl
+			<< "     NUMBER OF NONE ZERO ELEMENT . . . . . . . . . .(NNZ) = " << FEMData->GetSparseStiffnessMatrix()->GetNNZ()
+			<< endl
+			<< endl;
+	}
+	else
+	{
+		*this << "     STORAGE OF STIFFNESS MATRIX . . . . . . . . . . . .  = " << FEMData->GetSTYPE()
+			<< endl
+			<< "         EQ.0, SKYLINE STORAGE METHOD"
+			<< endl
+			<< "         EQ.1, PARDISO STORAGE METHOD"
+			<< endl
+			<< "     NUMBER OF EQUATIONS . . . . . . . . . . . . . .(NEQ) = " << FEMData->GetNEQ()
+			<< endl
+			<< "     NUMBER OF MATRIX ELEMENTS . . . . . . . . . . .(NWK) = " << FEMData->GetStiffnessMatrix()->size()
+			<< endl
+			<< "     MAXIMUM HALF BANDWIDTH  . . . . . . . . . . . .(MK ) = " << FEMData->GetStiffnessMatrix()->GetMaximumHalfBandwidth()
+			<< endl
+			<< "     MEAN HALF BANDWIDTH . . . . . . . . . . . . . .(MM ) = " << FEMData->GetStiffnessMatrix()->size() / FEMData->GetNEQ() << endl
+			<< endl
+			<< endl;
+	}
 }
 
 #ifdef _DEBUG_
