@@ -77,6 +77,16 @@ bool CHexT::Read(ifstream& Input, unsigned int Ele, CMaterial* MaterialSets, CNo
 	nodes_[18] = &NodeList[N19 - 1];
 	nodes_[19] = &NodeList[N20 - 1];
 
+	for (int i = 0; i < 8; i++)
+	{
+		nodes_[i]->Tec_flag = true;
+	}
+
+	for (int i = 8; i < NEN_; i++)
+	{
+		nodes_[i]->Tec_flag = false;
+	}
+
 	return true;
 }
 
@@ -97,10 +107,8 @@ void CHexT::Write(COutputter& output, unsigned int Ele)
 //	Write element data to stream
 void CHexT::Write(CTecOutputter& output)
 {
-	output << nodes_[0]->NodeNumber << " " << nodes_[1]->NodeNumber << " " << nodes_[2]->NodeNumber << " " << nodes_[3]->NodeNumber << nodes_[4]->NodeNumber << " " 
-		<< nodes_[5]->NodeNumber << " " << nodes_[6]->NodeNumber << " " << nodes_[7]->NodeNumber << nodes_[8]->NodeNumber << " " << nodes_[9]->NodeNumber << " " 
-		<< nodes_[10]->NodeNumber << " " << nodes_[11]->NodeNumber << nodes_[12]->NodeNumber << " " << nodes_[13]->NodeNumber << " " << nodes_[14]->NodeNumber << " "
-		<< nodes_[15]->NodeNumber << nodes_[16]->NodeNumber << " " << nodes_[17]->NodeNumber << " " << nodes_[18]->NodeNumber << " " << nodes_[19]->NodeNumber << endl;
+	output << nodes_[0]->NodeTecNumber << " " << nodes_[1]->NodeTecNumber << " " << nodes_[2]->NodeTecNumber << " " << nodes_[3]->NodeTecNumber << " "<< nodes_[4]->NodeTecNumber << " " 
+		<< nodes_[5]->NodeTecNumber << " " << nodes_[6]->NodeTecNumber << " " << nodes_[7]->NodeTecNumber << endl;
 }
 
 //  Generate location matrix: the global equation number that corresponding to each DOF of the element

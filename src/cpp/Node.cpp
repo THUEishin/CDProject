@@ -23,6 +23,8 @@ CNode::CNode(double X, double Y, double Z)
 		Stress[i] = 0.0;
 
 	count = 0;
+	Tec_flag = false;
+	NodeTecNumber = 0;
     
     bcode[0] = 0;	// Boundary codes
     bcode[1] = 0;
@@ -66,6 +68,8 @@ void CNode::Write(CTecOutputter& output, unsigned int PTYPE, unsigned int flag,d
 	//!       1-nodal position of initial phase after calculation
 	//!       2-nodal position of deformed phase after calculation
 	//! Displacement = nullptr before calculation
+	if (!Tec_flag) return;
+
 	double UXYZ[NDF];
 	for (unsigned int i = 0; i < NDF; i++) UXYZ[i] = 0.0;
 

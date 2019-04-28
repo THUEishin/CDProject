@@ -21,6 +21,9 @@ private:
 	//!	File stream for output
 	ofstream OutputFile;
 
+	//! The number of nodes needed to be output to Tecplot
+	unsigned int NUMTP;
+
 protected:
 
 	//!	Constructor

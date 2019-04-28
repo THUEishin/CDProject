@@ -11,6 +11,8 @@ CTecOutputter::CTecOutputter(string FileName)
 {
 	OutputFile.open(FileName);
 
+	NUMTP = 0;
+
 	if (!OutputFile)
 	{
 		cerr << "*** Error *** File " << FileName << " does not exist !" << endl;
@@ -61,8 +63,14 @@ void CTecOutputter::OutputInitInfo()
 	{
 		NUMET += EleGrpList[N].GetNUME();
 	}
-		
-	*this << "ZONE T=\"P_Initial\", F=FEPOINT, N=" << NUMNP << ", E=" << NUMET;
+	
+	for (unsigned int i = 0; i < NUMNP; i++)
+	{
+		if (NodeList[i].Tec_flag)
+			NUMTP++;
+	}
+
+	*this << "ZONE T=\"P_Initial\", F=FEPOINT, N=" << NUMTP << ", E=" << NUMET;
 	
 	if (PTYPE)
 	{
@@ -116,7 +124,7 @@ void CTecOutputter::OutputResult(unsigned int flag, unsigned int lcase)
 	{
 		*this << "ZONE T=\"P_lcase_" << to_string(lcase) << "_deformphase\", ";
 	}
-	*this << "F=FEPOINT, N=" << NUMNP << ", E=" << NUMET;
+	*this << "F=FEPOINT, N=" << NUMTP << ", E=" << NUMET;
 
 	if (PTYPE)
 	{
