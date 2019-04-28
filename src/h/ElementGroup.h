@@ -15,6 +15,7 @@
 #include "Element.h"
 #include "Bar.h"
 #include "Quad.h"
+#include "HexT.h"
 #include "Material.h"
 #include "Node.h"
 
@@ -28,6 +29,7 @@ enum ElementTypes
     Q4,     // 4Q element
     T3,     // 3T element
     H8,     // 8H element
+	H20,   // 20H element
     Beam,   // Beam element
     Plate,  // Plate element
     Shell   // Shell elment

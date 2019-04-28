@@ -14,3 +14,7 @@ The project for the course 'Computational Dynamics'. This README.md is used to r
 ### Modification by Jia sun 
 #### Date: 2019/4/27
 1.Add
+
+### Modification by Cong Chen
+#### Date:2019/4/28
+1.Add element type: HexT （20 nodes）.The number of this _ElementType for input is 5;

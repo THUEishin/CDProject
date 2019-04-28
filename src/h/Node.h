@@ -30,7 +30,7 @@ public:
 //!	x, y and z coordinates of the node
 	double XYZ[NDF];
 
-//! {xx, yy, zz, xy, xz, xz} for nodal stress
+//! {xx, yy, zz, xy, xz, yz} for nodal stress
 	double Stress[6];
 
 	unsigned int count;

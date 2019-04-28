@@ -150,6 +150,7 @@ void COutputter::OutputElementInfo()
 			  << ElementType << endl;
 		*this << "     EQ.1, TRUSS ELEMENTS" << endl
 			  << "     EQ.2, QUADRILATERAL ELEMENTS" << endl
+			  << "     EQ.5  HEXT ELEMENTS "<<endl
 			  << "     EQ.3, NOT AVAILABLE" << endl
 			  << endl;
 
@@ -164,6 +165,9 @@ void COutputter::OutputElementInfo()
 				break;
 			case ElementTypes::Q4:	// Quadratic element
 				PrintQuadElementData(EleGrp);
+				break;
+			case ElementTypes::H20:  //HexT element
+				PrintHexTElementData(EleGrp);
 				break;
 		}
 	}
@@ -247,6 +251,47 @@ void COutputter::PrintQuadElementData(unsigned int EleGrp)
 
 	*this << endl;
 }
+
+//	Output HexT element data
+void COutputter::PrintHexTElementData(unsigned int EleGrp)
+{
+	CDomain* FEMData = CDomain::Instance();
+
+	CElementGroup& ElementGroup = FEMData->GetEleGrpList()[EleGrp];
+	unsigned int NUMMAT = ElementGroup.GetNUMMAT();
+
+	*this << " M A T E R I A L   D E F I N I T I O N" << endl
+		<< endl;
+	*this << " NUMBER OF DIFFERENT SETS OF MATERIAL" << endl;
+	*this << " AND CROSS-SECTIONAL  CONSTANTS  . . . .( NPAR(3) ) . . =" << setw(5) << NUMMAT
+		<< endl
+		<< endl;
+
+	*this << "  SET       YOUNG'S      POISSON" << endl
+		<< " NUMBER     MODULUS        RATE" << endl
+		<< "               E              NU" << endl;
+
+	*this << setiosflags(ios::scientific) << setprecision(5);
+
+	//	Loop over for all property sets
+	for (unsigned int mset = 0; mset < NUMMAT; mset++)
+		ElementGroup.GetMaterial(mset).Write(*this, mset);
+
+	*this << endl
+		<< endl
+		<< " E L E M E N T   I N F O R M A T I O N" << endl;
+	*this << " ELEMENT     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE       MATERIAL" << endl
+		<< " NUMBER-N      1        2        3        4        5        6        7        8        9        10       11       12       13       14       15       16       17       18       19       20        SET NUMBER" << endl;
+
+	unsigned int NUME = ElementGroup.GetNUME();
+
+	//	Loop over for all elements in group EleGrp
+	for (unsigned int Ele = 0; Ele < NUME; Ele++)
+		ElementGroup[Ele].Write(*this, Ele);
+
+	*this << endl;
+}
+
 
 //	Print load data
 void COutputter::OutputLoadInfo()
@@ -384,7 +429,7 @@ void COutputter::OutputNodalStress()
 
 			break;
 
-		case ElementTypes::Q4: // Bar element
+		case ElementTypes::Q4: // Q4 element
 			double stressQuad[12];
 
 			for (unsigned int Ele = 0; Ele < NUME; Ele++)
@@ -394,7 +439,15 @@ void COutputter::OutputNodalStress()
 			}
 
 			break;
+		case ElementTypes::H20: //HexT element
+			double stressHexT[48];
 
+			for (unsigned int Ele = 0; Ele < NUME; Ele++)
+			{
+				CElement& Element = EleGrp[Ele];
+				Element.ElementStress(stressHexT, Displacement);
+			}
+			break;
 		default: // Invalid element type
 			cerr << "*** Error *** Elment type " << ElementType
 				<< " has not been implemented.\n\n";
