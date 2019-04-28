@@ -60,6 +60,9 @@ public:
 //!	Output quadratic element data
 	void PrintQuadElementData(unsigned int EleGrp);
 
+//!	Output HexT element data
+	void COutputter::PrintHexTElementData(unsigned int EleGrp);
+
 //!	Output load data 
 	void OutputLoadInfo(); 
 

@@ -7,3 +7,7 @@ The project for the course 'Computational Dynamics'. This README.md is used to r
 2. Replace element stress with nodal stress in output phase. Apply Average SPR Method to calculate nodal stress;
 #### Date: 2019/4/26
 3. Postproccess phase for [Tecplot](https://www.tecplot.com/) Display.
+
+### Modification by Cong Chen
+##### Date:2019/4/28
+1.Add element type: HexT （20 nodes）.The number of this _ElementType for input is 5;

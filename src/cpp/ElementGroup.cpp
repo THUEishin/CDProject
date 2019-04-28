@@ -70,6 +70,10 @@ void CElementGroup::CalculateMemberSize()
 			ElementSize_ = sizeof(CQuad);
 			MaterialSize_ = sizeof(CQuadMaterial);
 			break;
+		case ElementTypes::H20:
+			ElementSize_ = sizeof(CHexT);
+			MaterialSize_=sizeof(CHexTMaterial);
+			break;
         default:
             std::cerr << "Type " << ElementType_ << " not available. See CElementGroup::CalculateMemberSize." << std::endl;
             exit(5);
@@ -88,6 +92,9 @@ void CElementGroup::AllocateElements(std::size_t size)
 		case ElementTypes::Q4:
 			ElementList_ = new CQuad[size];
 			break;
+		case ElementTypes::H20:
+			ElementList_ = new CHexT[size];
+			break;
         default:
             std::cerr << "Type " << ElementType_ << " not available. See CElementGroup::AllocateElement." << std::endl;
             exit(5);
@@ -104,6 +111,9 @@ void CElementGroup::AllocateMaterials(std::size_t size)
             break;
 		case ElementTypes::Q4:
 			MaterialList_ = new CQuadMaterial[size];
+			break;
+		case ElementTypes::H20:
+			MaterialList_ = new CHexTMaterial[size];
 			break;
         default:
             std::cerr << "Type " << ElementType_ << " not available. See CElementGroup::AllocateMaterial." << std::endl;
