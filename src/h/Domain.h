@@ -17,6 +17,7 @@
 #include "Solver.h"
 #include "LoadCaseData.h"
 #include "SkylineMatrix.h"
+#include "SparseMatrix.h"
 
 using namespace std;
 
@@ -48,6 +49,11 @@ private:
 		1 : 3D problem */
 	unsigned int PTYPE;
 
+//!	Storage type: 
+/*!		0 : Skyline Storage;
+		1 : Sparse Storge */
+	unsigned int STYPE;
+
 //!	Total number of nodal points
 	unsigned int NUMNP;
 
@@ -77,6 +83,9 @@ private:
 /*! A one-dimensional array storing only the elements below the	skyline of the 
     global stiffness matrix. */
     CSkylineMatrix<double>* StiffnessMatrix;
+
+//! Sparse stiffness matrix
+	CSparseMatrix* SparseStiffnessMatrix;
 
 //!	Global nodal force/displacement vector
 	double* Force;
@@ -127,6 +136,9 @@ public:
 //!	Return problem type
 	inline unsigned int GetPTYPE() { return PTYPE; }
 
+//!	Return storage type
+	inline unsigned int GetSTYPE() { return STYPE; }
+
 //!	Return the title of problem
 	inline string GetTitle() { return Title; }
 
@@ -162,5 +174,8 @@ public:
 
 //!	Return pointer to the banded stiffness matrix
 	inline CSkylineMatrix<double>* GetStiffnessMatrix() { return StiffnessMatrix; }
+
+//!	Return pointer to the sparse stiffness matrix
+	inline CSparseMatrix* GetSparseStiffnessMatrix() { return SparseStiffnessMatrix; }
 
 };

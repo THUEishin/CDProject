@@ -63,13 +63,21 @@ int main(int argc, char *argv[])
 //  and address of diagonal elements
 	FEMData->AllocateMatrices();
     
-//  Assemble the banded gloabl stiffness matrix
+//  Assemble the gloabl stiffness matrix
 	FEMData->AssembleStiffnessMatrix();
     
     double time_assemble = timer.ElapsedTime();
 
 //  Solve the linear equilibrium equations for displacements
-	CLDLTSolver* Solver = new CLDLTSolver(FEMData->GetStiffnessMatrix());
+	CSolver* Solver;
+	if (FEMData->GetSTYPE())
+	{
+		Solver = new CPARDISOSolver(FEMData->GetSparseStiffnessMatrix());
+	}
+	else
+	{
+		Solver = new CLDLTSolver(FEMData->GetStiffnessMatrix());
+	}
     
 //  Perform L*D*L(T) factorization of stiffness matrix
     Solver->LDLT();
@@ -103,6 +111,8 @@ int main(int argc, char *argv[])
 		//! Write result to Tecplot file in deformed phase
 		TecOutput->OutputResult(2, lcase);
     }
+
+	Solver->ReleasePhase();
 
     double time_solution = timer.ElapsedTime();
 

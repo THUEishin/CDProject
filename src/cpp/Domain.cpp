@@ -57,6 +57,8 @@ CDomain::CDomain()
 {
 	Title[0] = '0';
 	MODEX = 0;
+	PTYPE = 1;
+	STYPE = 0;
 
 	NUMNP = 0;
 	NodeList = nullptr;
@@ -72,6 +74,7 @@ CDomain::CDomain()
 
 	Force = nullptr;
 	StiffnessMatrix = nullptr;
+	SparseStiffnessMatrix = nullptr;
 }
 
 //	Desconstructor
@@ -118,6 +121,9 @@ bool CDomain::ReadData(string FileName, string OutFile)
 
 //	Read the control line
 	Input >> NUMNP >> NUMEG >> NLCASE >> MODEX;
+
+	if (MODEX == 1) STYPE = 0;
+	else if(MODEX == 2) STYPE = 1;
 
 //	Read nodal point data
 	if (ReadNodalPoints())
@@ -261,7 +267,17 @@ void CDomain::AssembleStiffnessMatrix()
         {
             CElement& Element = ElementGrp[Ele];
             Element.ElementStiffness(Matrix);
-            StiffnessMatrix->Assembly(Matrix, Element.GetLocationMatrix(), Element.GetND());
+			if (STYPE)
+			{
+				//! For Skyline storage method, the LM is calculated in CalculateColumnHeights
+				//! For Sparse storage method, we should generate LM for the first time here
+				Element.GenerateLocationMatrix();
+				SparseStiffnessMatrix->Assembly(Matrix, Element.GetLocationMatrix(), Element.GetND());
+			}
+			else
+			{
+				StiffnessMatrix->Assembly(Matrix, Element.GetLocationMatrix(), Element.GetND());
+			}
         }
 
 		delete[] Matrix;
@@ -303,18 +319,24 @@ void CDomain::AllocateMatrices()
 	Force = new double[NEQ];
     clear(Force, NEQ);
 
-//  Create the banded stiffness matrix
-    StiffnessMatrix = new CSkylineMatrix<double>(NEQ);
+	if (STYPE)
+	{
+		SparseStiffnessMatrix = new CSparseMatrix();
+	}
+	else
+	{
+		//  Create the banded stiffness matrix
+		StiffnessMatrix = new CSkylineMatrix<double>(NEQ);
 
-//	Calculate column heights
-	CalculateColumnHeights();
+		//	Calculate column heights
+		CalculateColumnHeights();
 
-//	Calculate address of diagonal elements in banded matrix
-	StiffnessMatrix->CalculateDiagnoalAddress();
+		//	Calculate address of diagonal elements in banded matrix
+		StiffnessMatrix->CalculateDiagnoalAddress();
 
-//	Allocate for banded global stiffness matrix
-    StiffnessMatrix->Allocate();
-
+		//	Allocate for banded global stiffness matrix
+		StiffnessMatrix->Allocate();
+	}
 	COutputter* Output = COutputter::Instance();
 	Output->OutputTotalSystemData();
 }
