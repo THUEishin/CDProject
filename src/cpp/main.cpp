@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 //  and address of diagonal elements
 	FEMData->AllocateMatrices();
     
-//  Assemble the banded gloabl stiffness matrix
+//  Assemble the gloabl stiffness matrix
 	FEMData->AssembleStiffnessMatrix();
     
     double time_assemble = timer.ElapsedTime();

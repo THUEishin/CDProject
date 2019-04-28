@@ -77,6 +77,9 @@ public:
 //!	Calculate element stress 
 	virtual void ElementStress(double* stress, double* Displacement) = 0;
 
+//! Return the number of nodes per element
+	inline unsigned int GetNEN() { return NEN_; }
+	
 //!	Return nodes of the element
 	inline CNode** GetNodes() { return nodes_; }
 

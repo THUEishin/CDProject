@@ -423,17 +423,40 @@ void COutputter::OutputTotalSystemData()
 	CDomain* FEMData = CDomain::Instance();
 
 	*this << "	TOTAL SYSTEM DATA" << endl
-		  << endl;
+		<< endl;
 
-	*this << "     NUMBER OF EQUATIONS . . . . . . . . . . . . . .(NEQ) = " << FEMData->GetNEQ()
-		  << endl
-		  << "     NUMBER OF MATRIX ELEMENTS . . . . . . . . . . .(NWK) = " << FEMData->GetStiffnessMatrix()->size()
-		  << endl
-		  << "     MAXIMUM HALF BANDWIDTH  . . . . . . . . . . . .(MK ) = " << FEMData->GetStiffnessMatrix()->GetMaximumHalfBandwidth()
-		  << endl
-		  << "     MEAN HALF BANDWIDTH . . . . . . . . . . . . . .(MM ) = " << FEMData->GetStiffnessMatrix()->size() / FEMData->GetNEQ() << endl
-		  << endl
-		  << endl;
+	if (FEMData->GetSTYPE())
+	{
+		*this << "     STORAGE OF STIFFNESS MATRIX . . . . . . . . . . . .  = " << FEMData->GetSTYPE()
+			<< endl
+			<< "         EQ.0, SKYLINE STORAGE METHOD"
+			<< endl
+			<< "         EQ.1, PARDISO STORAGE METHOD"
+			<< endl
+			<< "     NUMBER OF EQUATIONS . . . . . . . . . . . . . .(NEQ) = " << FEMData->GetNEQ()
+			<< endl
+			<< "     NUMBER OF NONE ZERO ELEMENT . . . . . . . . . .(NNZ) = " << FEMData->GetSparseStiffnessMatrix()->GetNNZ()
+			<< endl
+			<< endl;
+	}
+	else
+	{
+		*this << "     STORAGE OF STIFFNESS MATRIX . . . . . . . . . . . .  = " << FEMData->GetSTYPE()
+			<< endl
+			<< "         EQ.0, SKYLINE STORAGE METHOD"
+			<< endl
+			<< "         EQ.1, PARDISO STORAGE METHOD"
+			<< endl
+			<< "     NUMBER OF EQUATIONS . . . . . . . . . . . . . .(NEQ) = " << FEMData->GetNEQ()
+			<< endl
+			<< "     NUMBER OF MATRIX ELEMENTS . . . . . . . . . . .(NWK) = " << FEMData->GetStiffnessMatrix()->size()
+			<< endl
+			<< "     MAXIMUM HALF BANDWIDTH  . . . . . . . . . . . .(MK ) = " << FEMData->GetStiffnessMatrix()->GetMaximumHalfBandwidth()
+			<< endl
+			<< "     MEAN HALF BANDWIDTH . . . . . . . . . . . . . .(MM ) = " << FEMData->GetStiffnessMatrix()->size() / FEMData->GetNEQ() << endl
+			<< endl
+			<< endl;
+	}
 }
 
 #ifdef _DEBUG_

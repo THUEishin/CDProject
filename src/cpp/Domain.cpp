@@ -57,6 +57,8 @@ CDomain::CDomain()
 {
 	Title[0] = '0';
 	MODEX = 0;
+	PTYPE = 1;
+	STYPE = 0;
 
 	NUMNP = 0;
 	NodeList = nullptr;
@@ -72,6 +74,7 @@ CDomain::CDomain()
 
 	Force = nullptr;
 	StiffnessMatrix = nullptr;
+	SparseStiffnessMatrix = nullptr;
 }
 
 //	Desconstructor
@@ -117,7 +120,7 @@ bool CDomain::ReadData(string FileName, string OutFile)
 	TecOutput->OutputHeading();
 
 //	Read the control line
-	Input >> NUMNP >> NUMEG >> NLCASE >> MODEX;
+	Input >> NUMNP >> NUMEG >> NLCASE >> MODEX >> STYPE;
 
 //	Read nodal point data
 	if (ReadNodalPoints())
@@ -303,18 +306,24 @@ void CDomain::AllocateMatrices()
 	Force = new double[NEQ];
     clear(Force, NEQ);
 
-//  Create the banded stiffness matrix
-    StiffnessMatrix = new CSkylineMatrix<double>(NEQ);
+	if (STYPE)
+	{
+		SparseStiffnessMatrix = new CSparseMatrix<double>();
+	}
+	else
+	{
+		//  Create the banded stiffness matrix
+		StiffnessMatrix = new CSkylineMatrix<double>(NEQ);
 
-//	Calculate column heights
-	CalculateColumnHeights();
+		//	Calculate column heights
+		CalculateColumnHeights();
 
-//	Calculate address of diagonal elements in banded matrix
-	StiffnessMatrix->CalculateDiagnoalAddress();
+		//	Calculate address of diagonal elements in banded matrix
+		StiffnessMatrix->CalculateDiagnoalAddress();
 
-//	Allocate for banded global stiffness matrix
-    StiffnessMatrix->Allocate();
-
+		//	Allocate for banded global stiffness matrix
+		StiffnessMatrix->Allocate();
+	}
 	COutputter* Output = COutputter::Instance();
 	Output->OutputTotalSystemData();
 }
