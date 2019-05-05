@@ -17,4 +17,7 @@ The project for the course 'Computational Dynamics'. This README.md is used to r
 
 ### Modification by Cong Chen
 #### Date:2019/4/28
-1.Add element type: HexT （20 nodes）.The number of this _ElementType for input is 5;
+1. Add element type: HexT （20 nodes）.The number of this _ElementType for input is 5;
+#### Date:2019/5/5
+2. Preprocess for truss .inp file from Abaqus.
+3. Revise the bug in the HexT file

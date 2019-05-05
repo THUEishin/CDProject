@@ -100,7 +100,7 @@ void CNode::Write(CTecOutputter& output, unsigned int PTYPE, unsigned int flag,d
 				exit(1);
 			}
 			
-			output << XYZ[0] + UXYZ[0] << " " << XYZ[1] + UXYZ[1] << " " << XYZ[2] + UXYZ[2] << " ";
+			output << XYZ[0] + 1.0e7*UXYZ[0] << " " << XYZ[1] + 1.0e7*UXYZ[1] << " " << XYZ[2] + 1.0e7*UXYZ[2] << " ";
 		}
 
 		for (unsigned int i = 0; i < NDF; i++) output<< UXYZ[i] << " ";

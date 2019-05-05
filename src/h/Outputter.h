@@ -82,7 +82,7 @@ public:
 	template <typename T>
 	COutputter& operator<<(const T& item) 
 	{
-		std::cout << item;
+		//std::cout << item;
 		OutputFile << item;
 		return *this;
 	}
@@ -90,7 +90,7 @@ public:
 	typedef std::basic_ostream<char, std::char_traits<char> > CharOstream;
 	COutputter& operator<<(CharOstream& (*op)(CharOstream&)) 
 	{
-		op(std::cout);
+		//op(std::cout);
 		op(OutputFile);
 		return *this;
 	}
