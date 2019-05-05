@@ -33,6 +33,11 @@ public:
 //! {xx, yy, zz, xy, xz, yz} for nodal stress
 	double Stress[6];
 
+//! bool to control whether the node is output in Tecplot visualization
+	bool Tec_flag;
+
+	unsigned int NodeTecNumber;
+
 	unsigned int count;
 
 //!	Boundary code of each degree of freedom of the node

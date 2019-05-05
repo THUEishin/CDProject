@@ -77,6 +77,16 @@ bool CHexT::Read(ifstream& Input, unsigned int Ele, CMaterial* MaterialSets, CNo
 	nodes_[18] = &NodeList[N19 - 1];
 	nodes_[19] = &NodeList[N20 - 1];
 
+	for (int i = 0; i < 8; i++)
+	{
+		nodes_[i]->Tec_flag = true;
+	}
+
+	for (int i = 8; i < NEN_; i++)
+	{
+		nodes_[i]->Tec_flag = false;
+	}
+
 	return true;
 }
 
@@ -97,10 +107,8 @@ void CHexT::Write(COutputter& output, unsigned int Ele)
 //	Write element data to stream
 void CHexT::Write(CTecOutputter& output)
 {
-	output << nodes_[0]->NodeNumber << " " << nodes_[1]->NodeNumber << " " << nodes_[2]->NodeNumber << " " << nodes_[3]->NodeNumber << nodes_[4]->NodeNumber << " " 
-		<< nodes_[5]->NodeNumber << " " << nodes_[6]->NodeNumber << " " << nodes_[7]->NodeNumber << nodes_[8]->NodeNumber << " " << nodes_[9]->NodeNumber << " " 
-		<< nodes_[10]->NodeNumber << " " << nodes_[11]->NodeNumber << nodes_[12]->NodeNumber << " " << nodes_[13]->NodeNumber << " " << nodes_[14]->NodeNumber << " "
-		<< nodes_[15]->NodeNumber << nodes_[16]->NodeNumber << " " << nodes_[17]->NodeNumber << " " << nodes_[18]->NodeNumber << " " << nodes_[19]->NodeNumber << endl;
+	output << nodes_[0]->NodeTecNumber << " " << nodes_[1]->NodeTecNumber << " " << nodes_[2]->NodeTecNumber << " " << nodes_[3]->NodeTecNumber << " "<< nodes_[4]->NodeTecNumber << " " 
+		<< nodes_[5]->NodeTecNumber << " " << nodes_[6]->NodeTecNumber << " " << nodes_[7]->NodeTecNumber << endl;
 }
 
 //  Generate location matrix: the global equation number that corresponding to each DOF of the element
@@ -277,9 +285,8 @@ void CHexT::Constitutive(double D[6][6])
 //! Return the shape function value of point with parent coordinate (xi, eta)
 void CHexT::SHPFunction(double SHP[20], double R, double S , double T)
 {
-	double R1, R2, S1, S2, T1, T2, N9, N10, N11, N12, N13, N14, N15, N16, N17, N18, N19, N20;
+	double R1, R2, S1, S2, T1, T2;
 	double N1P, N2P, N3P, N4P, N5P, N6P, N7P, N8P;
-	double N1, N2, N3, N4, N5, N6, N7, N8;
 	R1 = 1 + R;
 	R2 = 1 - R;
 	S1 = 1 + S;
@@ -298,22 +305,23 @@ void CHexT::SHPFunction(double SHP[20], double R, double S , double T)
 	SHP[9] = 0.25*T2*R1*S1*S2;
 	SHP[10] = 0.25*T2*R1*R2*S1;
 	SHP[11] = 0.25*T2*R2*S1*S2;
-	SHP[12] = 0.25*T2*T1*R2*S2;
-	SHP[13] = 0.25*T2*T1*R1*S2;
-	SHP[14] = 0.25*T2*T1*R1*S1;
-	SHP[15] = 0.25*T2*T1*R2*S1;
-	SHP[16] = 0.25*T1*R1*R2*S2;
-	SHP[17] = 0.25*T1*R1*S1*S2;
-	SHP[18] = 0.25*T1*R1*R2*S1;
-	SHP[19] = 0.25*T1*R2*S1*S2;
-	SHP[0] = N1P - 0.5*N9 - 0.5*N12 - 0.5*N13;
-	SHP[1] = N2P - 0.5*N9 - 0.5*N10 - 0.5*N14;
-	SHP[2] = N3P - 0.5*N10 - 0.5*N11 - 0.5*N15;
-	SHP[3] = N4P - 0.5*N11 - 0.5*N12 - 0.5*N16;
-	SHP[4] = N5P - 0.5*N13 - 0.5*N17 - 0.5*N20;
-	SHP[5] = N6P - 0.5*N17 - 0.5*N18 - 0.5*N14;
-	SHP[6] = N7P - 0.5*N18 - 0.5*N19 - 0.5*N15;
-	SHP[7] = N8P - 0.5*N19 - 0.5*N20 - 0.5*N16;
+	SHP[12] = 0.25*T1*R1*R2*S2;
+	SHP[13] = 0.25*T1*R1*S1*S2;
+	SHP[14] = 0.25*T1*R1*R2*S1;
+	SHP[15] = 0.25*T1*R2*S1*S2;
+	SHP[16] = 0.25*T2*T1*R2*S2;
+	SHP[17] = 0.25*T2*T1*R1*S2;
+	SHP[18] = 0.25*T2*T1*R1*S1;
+	SHP[19] = 0.25*T2*T1*R2*S1;
+	SHP[0] = N1P - 0.5*SHP[8] - 0.5*SHP[11] - 0.5*SHP[16];
+	SHP[1] = N2P - 0.5*SHP[8] - 0.5*SHP[9] - 0.5*SHP[17];
+	SHP[2] = N3P - 0.5*SHP[9] - 0.5*SHP[10] - 0.5*SHP[18];
+	SHP[3] = N4P - 0.5*SHP[10] - 0.5*SHP[11] - 0.5*SHP[19];
+	SHP[4] = N5P - 0.5*SHP[12] - 0.5*SHP[15] - 0.5*SHP[16];
+	SHP[5] = N6P - 0.5*SHP[12] - 0.5*SHP[13] - 0.5*SHP[17];
+	SHP[6] = N7P - 0.5*SHP[13] - 0.5*SHP[14] - 0.5*SHP[18];
+	SHP[7] = N8P - 0.5*SHP[14] - 0.5*SHP[15] - 0.5*SHP[19];
+
 }
 
 //! Return the strain matrix value of point with parent coordinate (R, S, T)
@@ -349,14 +357,14 @@ void CHexT::StrainMatrix(double B[6][60], double R, double S, double T, double& 
 	P[0][9] = 0.25 *(1 - S) *(1 + S) *(1 - T);
 	P[0][10] = 0.25 *(1 - R) *(1 + S) *(1 - T) - 0.25 *(1 + R)* (1 + S) *(1 - T);
 	P[0][11] = -0.25 *(1 - S) *(1 + S)* (1 - T);
-	P[0][12] = -0.25 *(1 - S) *(1 - T) *(1 + T);
-	P[0][13] = 0.25 *(1 - S) *(1 - T) *(1 + T);
-	P[0][14] = 0.25 *(1 + S) *(1 - T) *(1 + T);
-	P[0][15] = -0.25 *(1 + S) *(1 - T) *(1 + T);
-	P[0][16] = 0.25 *(1 - R) *(1 - S)* (1 + T) - 0.25 *(1 + R) *(1 - S) *(1 + T);
-	P[0][17] = 0.25 *(1 - S) *(1 + S) *(1 + T);
-	P[0][18] = 0.25 *(1 - R) *(1 + S) *(1 + T) - 0.25 *(1 + R) *(1 + S) *(1 + T);
-	P[0][19] = -0.25 *(1 - S) *(1 + S) *(1 + T);
+	P[0][12] = 0.25 *(1 - R) *(1 - S)* (1 + T) - 0.25 *(1 + R) *(1 - S) *(1 + T);
+	P[0][13] = 0.25 *(1 - S) *(1 + S) *(1 + T);
+	P[0][14] = 0.25 *(1 - R) *(1 + S) *(1 + T) - 0.25 *(1 + R) *(1 + S) *(1 + T);
+	P[0][15] = -0.25 *(1 - S) *(1 + S) *(1 + T);
+	P[0][16] = -0.25 *(1 - S) *(1 - T) *(1 + T);
+	P[0][17] = 0.25 *(1 - S) *(1 - T) *(1 + T);
+	P[0][18] = 0.25 *(1 + S) *(1 - T) *(1 + T);
+	P[0][19] = -0.25 *(1 + S) *(1 - T) *(1 + T);
 
 	//With respect to S
 	P[1][0] = -0.125 *(1 - R) *(1 - T) + 0.125 *(1 - R) *(1 + R) *(1 - T) -
@@ -387,14 +395,14 @@ void CHexT::StrainMatrix(double B[6][60], double R, double S, double T, double& 
 	P[1][9] = 0.25 *(1 + R) *(1 - S) *(1 - T) - 0.25 *(1 + R) *(1 + S) *(1 - T);
 	P[1][10] = 0.25 *(1 - R) *(1 + R)* (1 - T);
 	P[1][11] = 0.25 *(1 - R) *(1 - S)* (1 - T) - 0.25 *(1 - R) *(1 + S) *(1 - T);
-	P[1][12] = -0.25 *(1 - R) *(1 - T) *(1 + T);
-	P[1][13] = -0.25 *(1 + R) *(1 - T) *(1 + T);
-	P[1][14] = 0.25 *(1 + R) *(1 - T) *(1 + T);
-	P[1][15] = 0.25 *(1 - R) *(1 - T) *(1 + T);
-	P[1][16] = -0.25 *(1 - R) *(1 + R)* (1 + T);
-	P[1][17] = 0.25 *(1 + R) *(1 - S) *(1 + T) - 0.25 *(1 + R) *(1 + S) *(1 + T);
-	P[1][18] = 0.25 *(1 - R) *(1 + R) *(1 + T);
-	P[1][19] = 0.25 *(1 - R) *(1 - S) *(1 + T) - 0.25 *(1 - R) *(1 + S) *(1 + T);
+	P[1][12] = -0.25 *(1 - R) *(1 + R)* (1 + T);
+	P[1][13] = 0.25 *(1 + R) *(1 - S) *(1 + T) - 0.25 *(1 + R) *(1 + S) *(1 + T);
+	P[1][14] = 0.25 *(1 - R) *(1 + R) *(1 + T);
+	P[1][15] = 0.25 *(1 - R) *(1 - S) *(1 + T) - 0.25 *(1 - R) *(1 + S) *(1 + T);
+	P[1][16] = -0.25 *(1 - R) *(1 - T) *(1 + T);
+	P[1][17] = -0.25 *(1 + R) *(1 - T) *(1 + T);
+	P[1][18] = 0.25 *(1 + R) *(1 - T) *(1 + T);
+	P[1][19] = 0.25 *(1 - R) *(1 - T) *(1 + T);
 
 	//With respect to T
 	P[2][0] = -0.125 *(1 - R) *(1 - S) + 0.125 *(1 - R) *(1 + R) *(1 - S) +
@@ -425,14 +433,14 @@ void CHexT::StrainMatrix(double B[6][60], double R, double S, double T, double& 
 	P[2][9] = -0.25 *(1 + R) *(1 - S) *(1 + S);
 	P[2][10] = -0.25 *(1 - R) *(1 + R) *(1 + S);
 	P[2][11] = -0.25 *(1 - R) *(1 - S) *(1 + S);
-	P[2][12] = 0.25 *(1 - R) *(1 - S) *(1 - T) - 0.25 *(1 - R) *(1 - S) *(1 + T);
-	P[2][13] = 0.25 *(1 + R) *(1 - S) *(1 - T) - 0.25 *(1 + R) *(1 - S) *(1 + T);
-	P[2][14] = 0.25 *(1 + R) *(1 + S) *(1 - T) - 0.25 *(1 + R) *(1 + S) *(1 + T);
-	P[2][15] = 0.25 *(1 - R) *(1 + S) *(1 - T) - 0.25 *(1 - R) *(1 + S) *(1 + T);
-	P[2][16] = 0.25 *(1 - R) *(1 + R) *(1 - S);
-	P[2][17] = 0.25 *(1 + R) *(1 - S) *(1 + S);
-	P[2][18] = 0.25 *(1 - R) *(1 + R) *(1 + S);
-	P[2][19] = 0.25 *(1 - R) *(1 - S) *(1 + S);
+	P[2][12] = 0.25 *(1 - R) *(1 + R) *(1 - S);
+	P[2][13] = 0.25 *(1 + R) *(1 - S) *(1 + S);
+	P[2][14] = 0.25 *(1 - R) *(1 + R) *(1 + S);
+	P[2][15] = 0.25 *(1 - R) *(1 - S) *(1 + S);
+	P[2][16] = 0.25 *(1 - R) *(1 - S) *(1 - T) - 0.25 *(1 - R) *(1 - S) *(1 + T);
+	P[2][17] = 0.25 *(1 + R) *(1 - S) *(1 - T) - 0.25 *(1 + R) *(1 - S) *(1 + T);
+	P[2][18] = 0.25 *(1 + R) *(1 + S) *(1 - T) - 0.25 *(1 + R) *(1 + S) *(1 + T);
+	P[2][19] = 0.25 *(1 - R) *(1 + S) *(1 - T) - 0.25 *(1 - R) *(1 + S) *(1 + T);
 
 	//Evaluate the jacobi matrix at point (R,S)
 	double XJ[3][3];
