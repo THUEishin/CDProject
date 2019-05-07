@@ -150,6 +150,7 @@ void COutputter::OutputElementInfo()
 			  << ElementType << endl;
 		*this << "     EQ.1, TRUSS ELEMENTS" << endl
 			  << "     EQ.2, QUADRILATERAL ELEMENTS" << endl
+			  << "     EQ.4, H8 ELEMENTS" << endl
 			  << "     EQ.5  HEXT ELEMENTS "<<endl
 			  << "     EQ.3, NOT AVAILABLE" << endl
 			  << endl;
@@ -168,6 +169,9 @@ void COutputter::OutputElementInfo()
 				break;
 			case ElementTypes::H20:  //HexT element
 				PrintHexTElementData(EleGrp);
+				break;
+			case ElementTypes::H8:  //H8 element
+				PrintH8ElementData(EleGrp);
 				break;
 		}
 	}
@@ -282,6 +286,45 @@ void COutputter::PrintHexTElementData(unsigned int EleGrp)
 		<< " E L E M E N T   I N F O R M A T I O N" << endl;
 	*this << " ELEMENT     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE       MATERIAL" << endl
 		<< " NUMBER-N      1        2        3        4        5        6        7        8        9        10       11       12       13       14       15       16       17       18       19       20        SET NUMBER" << endl;
+
+	unsigned int NUME = ElementGroup.GetNUME();
+
+	//	Loop over for all elements in group EleGrp
+	for (unsigned int Ele = 0; Ele < NUME; Ele++)
+		ElementGroup[Ele].Write(*this, Ele);
+
+	*this << endl;
+}
+
+void COutputter::PrintH8ElementData(unsigned int EleGrp)
+{
+	CDomain* FEMData = CDomain::Instance();
+
+	CElementGroup& ElementGroup = FEMData->GetEleGrpList()[EleGrp];
+	unsigned int NUMMAT = ElementGroup.GetNUMMAT();
+
+	*this << " M A T E R I A L   D E F I N I T I O N" << endl
+		<< endl;
+	*this << " NUMBER OF DIFFERENT SETS OF MATERIAL" << endl;
+	*this << " AND CROSS-SECTIONAL  CONSTANTS  . . . .( NPAR(3) ) . . =" << setw(5) << NUMMAT
+		<< endl
+		<< endl;
+
+	*this << "  SET       YOUNG'S      POISSON" << endl
+		<< " NUMBER     MODULUS        RATE" << endl
+		<< "               E              NU" << endl;
+
+	*this << setiosflags(ios::scientific) << setprecision(5);
+
+	//	Loop over for all property sets
+	for (unsigned int mset = 0; mset < NUMMAT; mset++)
+		ElementGroup.GetMaterial(mset).Write(*this, mset);
+
+	*this << endl
+		<< endl
+		<< " E L E M E N T   I N F O R M A T I O N" << endl;
+	*this << " ELEMENT     NODE     NODE     NODE     NODE     NODE     NODE     NODE     NODE       MATERIAL" << endl
+		<< " NUMBER-N      1        2        3        4        5        6        7        8        SET NUMBER" << endl;
 
 	unsigned int NUME = ElementGroup.GetNUME();
 
@@ -446,6 +489,15 @@ void COutputter::OutputNodalStress()
 			{
 				CElement& Element = EleGrp[Ele];
 				Element.ElementStress(stressHexT, Displacement);
+			}
+			break;
+			case ElementTypes::H8: //H8 element
+			double stressH8[48];
+
+			for (unsigned int Ele = 0; Ele < NUME; Ele++)
+			{
+				CElement& Element = EleGrp[Ele];
+				Element.ElementStress(stressH8, Displacement);
 			}
 			break;
 		default: // Invalid element type
