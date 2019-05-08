@@ -16,6 +16,7 @@
 #include "Bar.h"
 #include "Quad.h"
 #include "HexT.h"
+#include "H8.h"
 #include "Material.h"
 #include "Node.h"
 

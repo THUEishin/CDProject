@@ -63,6 +63,9 @@ public:
 //!	Output HexT element data
 	void COutputter::PrintHexTElementData(unsigned int EleGrp);
 
+//! Output H8 element data
+	void PrintH8ElementData(unsigned int EleGrp);
+
 //!	Output load data 
 	void OutputLoadInfo(); 
 
@@ -83,7 +86,7 @@ public:
 	COutputter& operator<<(const T& item) 
 	{
 		//std::cout << item;
-		OutputFile << item;
+ 		OutputFile << item;
 		return *this;
 	}
 

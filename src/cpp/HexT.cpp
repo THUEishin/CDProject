@@ -101,7 +101,7 @@ void CHexT::Write(COutputter& output, unsigned int Ele)
 		<< setw(9) << nodes_[13]->NodeNumber << setw(9) << nodes_[14]->NodeNumber << setw(9) << nodes_[15]->NodeNumber
 		<< setw(9) << nodes_[16]->NodeNumber << setw(9) << nodes_[17]->NodeNumber << setw(9) << nodes_[18]->NodeNumber
 		<< setw(9) << nodes_[19]->NodeNumber
-		<< setw(12) << ElementMaterial_->nset << endl;
+    	<< setw(12) << ElementMaterial_->nset << endl;
 }
 
 //	Write element data to stream
