@@ -10,6 +10,7 @@ The project for the course 'Computational Dynamics'. This README.md is used to r
 #### Date: 2019/4/28
 4. Add [Sparse Storage Method](https://software.intel.com/en-us/mkl-developer-reference-c-sparse-matrix-storage-formats) and [MKL PARDISO](https://software.intel.com/en-us/mkl-developer-reference-c-pardiso) Solver to the code. To use the Solver, set MODEX to be 2.
 5. There are some bugs in Tecplot output which have been revised.
+6. Add nodal mass as EFEP90 code.
 
 ### Modification by Cong Chen
 #### Date:2019/4/28
