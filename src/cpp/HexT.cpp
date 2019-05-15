@@ -87,6 +87,31 @@ bool CHexT::Read(ifstream& Input, unsigned int Ele, CMaterial* MaterialSets, CNo
 		nodes_[i]->Tec_flag = false;
 	}
 
+	//!< Calculate nodal mass
+	double rho = ElementMaterial_->density_0;
+	//! two point Guass Quadrature
+	double GP[2], weight[2], Jacobi, SHP[20];
+	Guassian(2, GP, weight);
+	double B[6][60]; // No use here
+
+	for (int I = 0; I < 2; I++)
+	{
+		for (int J = 0; J < 2; J++)
+		{
+			for (int K = 0; K < 2; K++)
+			{
+				StrainMatrix(B, GP[I], GP[J], GP[K], Jacobi);
+				double Gmass = rho * weight[I] * weight[J] * weight[K] * abs(Jacobi); // we can get volumn by integrating the function: f(x)=1
+				// Expolate the mass from Gauss point to nodes
+				SHPFunction(SHP, GP[I], GP[J], GP[K]);
+				for (int i = 0; i < 20; i++)
+				{
+					nodes_[i]->mass += Gmass * SHP[i];
+				}
+			}
+		}
+	}
+
 	return true;
 }
 

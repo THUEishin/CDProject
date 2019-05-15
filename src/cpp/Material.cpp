@@ -30,7 +30,7 @@ bool CBarMaterial::Read(ifstream& Input, unsigned int mset)
 		return false;
 	}
 
-	Input >> E >> Area;	// Young's modulus and section area
+	Input >> E >> Area >> density_0;	// Young's modulus and section area
 
 	return true;
 }
@@ -38,7 +38,7 @@ bool CBarMaterial::Read(ifstream& Input, unsigned int mset)
 //	Write material data to Stream
 void CBarMaterial::Write(COutputter& output, unsigned int mset)
 {
-	output << setw(5) << mset+1 << setw(16) << E << setw(16) << Area << endl;
+	output << setw(5) << mset+1 << setw(16) << E << setw(16) << Area << setw(16) << density_0 << endl;
 }
 
 //	Read material data from stream Input
@@ -55,7 +55,7 @@ bool CQuadMaterial::Read(ifstream& Input, unsigned int mset)
 		return false;
 	}
 
-	Input >> E >> Poisson;	// Young's modulus and Poisson Rate
+	Input >> E >> Poisson >> density_0;	// Young's modulus and Poisson Rate
 
 	return true;
 }
@@ -63,7 +63,7 @@ bool CQuadMaterial::Read(ifstream& Input, unsigned int mset)
 //	Write material data to Stream
 void CQuadMaterial::Write(COutputter& output, unsigned int mset)
 {
-	output << setw(5) << mset + 1 << setw(16) << E << setw(16) << Poisson << endl;
+	output << setw(5) << mset + 1 << setw(16) << E << setw(16) << Poisson << setw(16) << density_0 << endl;
 }
 
 //	Read material data from stream Input
@@ -80,7 +80,7 @@ bool CHexTMaterial::Read(ifstream& Input, unsigned int mset)
 		return false;
 	}
 
-	Input >> E >> Poisson;	// Young's modulus and Poisson Rate
+	Input >> E >> Poisson >> density_0;	// Young's modulus and Poisson Rate
 
 	return true;
 }
@@ -88,7 +88,7 @@ bool CHexTMaterial::Read(ifstream& Input, unsigned int mset)
 //	Write material data to Stream
 void CHexTMaterial::Write(COutputter& output, unsigned int mset)
 {
-	output << setw(5) << mset + 1 << setw(16) << E << setw(16) << Poisson << endl;
+	output << setw(5) << mset + 1 << setw(16) << E << setw(16) << Poisson << setw(16) << density_0 << endl;
 }
 
 bool CH8Material::Read(ifstream& Input, unsigned int mset)
@@ -104,7 +104,7 @@ bool CH8Material::Read(ifstream& Input, unsigned int mset)
 		return false;
 	}
 
-	Input >> E >> Poisson;	// Young's modulus and Poisson Rate
+	Input >> E >> Poisson >> density_0;	// Young's modulus and Poisson Rate
 
 	return true;
 }
@@ -112,5 +112,5 @@ bool CH8Material::Read(ifstream& Input, unsigned int mset)
 //	Write material data to Stream
 void CH8Material::Write(COutputter& output, unsigned int mset)
 {
-	output << setw(5) << mset + 1 << setw(16) << E << setw(16) << Poisson << endl;
+	output << setw(5) << mset + 1 << setw(16) << E << setw(16) << Poisson << setw(16) << density_0 << endl;
 }
