@@ -30,6 +30,9 @@ public:
 //!	x, y and z coordinates of the node
 	double XYZ[NDF];
 
+//! nodal mass for eigenvalue part
+	double mass;
+
 //! {xx, yy, zz, xy, xz, yz} for nodal stress
 	double Stress[6];
 

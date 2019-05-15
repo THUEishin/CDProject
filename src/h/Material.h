@@ -24,10 +24,12 @@ public:
 	
 	double E;  //!< Young's modulus
 
+	double density_0;  //!< initial density 
+
 public:
 
 //! Virtual deconstructor
-    virtual ~CMaterial() {};
+    virtual ~CMaterial() {density_0 = 0.0;};
 
 //!	Read material data from stream Input
 	virtual bool Read(ifstream& Input, unsigned int mset) = 0;

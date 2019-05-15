@@ -19,6 +19,8 @@ CNode::CNode(double X, double Y, double Z)
     XYZ[1] = Y;
     XYZ[2] = Z;
 
+	mass = 0.0;
+
 	for (int i = 0; i < 6; i++)
 		Stress[i] = 0.0;
 
