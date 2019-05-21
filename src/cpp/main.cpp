@@ -69,6 +69,35 @@ int main(int argc, char *argv[])
     double time_assemble = timer.ElapsedTime();
 
 //  Solve the linear equilibrium equations for displacements
+	//! Calculate the Eigenvalue by MKL FEAST
+	if (FEMData->GetMODEX() == 4)
+	{
+		CFEASTGVSolver* Solver = new CFEASTGVSolver(FEMData->GetSparseStiffnessMatrix());
+		int NEQ = FEMData->GetNEQ();
+		double emin = 0.0;
+		double emax = 10000.0;
+		int m0 = 10, m;
+		double* lambda = new double[m0];
+		double* res = new double[m0];
+		double* Q = new double[NEQ*m0];
+
+		Solver->Calculate_GV_FEAST(emin, emax, m0, m, lambda, res, Q);
+		ofstream eig;
+		eig.open(filename + ".eig");
+		eig << "The number of eigenvalue between the interval [" << emin << ", " << emax << "] is " << m << endl;
+		for (int i = 0; i < m; i++)
+		{
+			eig << "Eigen Value " << i + 1 << " : " << lambda[i] << endl;
+			eig << "The Eigen Vector is: " << endl;
+			for (int j = 0; j < NEQ; j++)
+			{
+				eig << Q[i*NEQ + j] << "    ";
+			}
+			eig << endl;
+		}
+		return 0;
+	}
+
 	CSolver* Solver;
 	if (FEMData->GetSTYPE())
 	{

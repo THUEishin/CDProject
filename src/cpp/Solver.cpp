@@ -14,6 +14,8 @@
 #include <cfloat>
 #include <iostream>
 #include <algorithm>
+#include <mkl.h>
+#include "../h/Domain.h"
 #include "mkl_pardiso.h"
 #include "stdlib.h"
 #include <fstream>
@@ -211,4 +213,59 @@ void CPARDISOSolver::ReleasePhase()
 	phase = -1;
 	PARDISO(pt, &maxfct, &mnum, &mtype, &phase, &NEQ, SparseM->_K, SparseM->_iK, SparseM->_jK, &idum, &nrhs, iparm, &msglvl, &ddum, &ddum, &error);
 	return;
+}
+
+CFEASTGVSolver::CFEASTGVSolver(CSparseMatrix* K)
+{
+	SparseK = K;
+	NEQ = SparseK->NEQ_;
+
+	CDomain* FEMData = CDomain::Instance();
+
+	int NUMNP = FEMData->GetNUMNP();
+	CNode* nodelist = FEMData->GetNodeList();
+
+	_M = new double[NEQ];
+	_jM = new MKL_INT[NEQ];
+	_iM = new MKL_INT[NEQ + 1];
+
+	for (int i = 0; i < NEQ; i++)
+	{
+		_iM[i] = i + 1;
+		_jM[i] = i + 1;
+	}
+
+	_iM[NEQ] = NEQ + 1;
+
+	int NDF = CNode::NDF;
+	for (int i = 0; i < NUMNP; i++)
+	{
+		CNode* node = &nodelist[i];
+		for (int j = 0; j < NDF; j++)
+		{
+			if (node->bcode[j] > 0)
+			{
+				_M[node->bcode[j] - 1] = node->mass;
+			}
+		}
+	}
+}
+
+void CFEASTGVSolver::Calculate_GV_FEAST(double emin, double emax, MKL_INT& m0, MKL_INT& m, double* lambda, double* res, double* Q)
+{
+	char uplo = 'U';
+	MKL_INT fpm[128];
+	double epsout;
+	MKL_INT loop;
+	MKL_INT info;
+
+	feastinit(fpm);
+
+	dfeast_scsrgv(&uplo, &NEQ, SparseK->_K, SparseK->_iK, SparseK->_jK, _M, _iM, _jM, fpm, &epsout, &loop, &emin, &emax, &m0, lambda, Q, &m, res, &info);
+
+	if (info != 0)
+	{
+		cout << "There is error in FEAST Solver. Error Code is " << info << endl;
+		exit(1);
+	}
 }

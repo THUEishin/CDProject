@@ -89,3 +89,29 @@ public:
 //! Release Additional memory
 	virtual void ReleasePhase();
 };
+
+//! Generalized Eigenvalue solver: A in core solver using sparse storage and MKL FEAST
+class CFEASTGVSolver
+{
+private:
+
+	//! Stiffness Matrix
+	CSparseMatrix* SparseK;
+
+	//! Mass Matrix
+	double* _M;
+
+	MKL_INT* _iM;
+
+	MKL_INT* _jM;
+
+	MKL_INT NEQ;
+
+public:
+
+	CFEASTGVSolver(CSparseMatrix* K);
+
+	//! Calculate the eigenvalue in interval [emin, emax] with a guess of total number of eigenvalue: m0
+	//! m is actual number of eigenvalue in interval [emin, emax] and m should be smaller than m0
+	void Calculate_GV_FEAST(double emin, double emax, MKL_INT& m0, MKL_INT& m, double* lambda, double* res, double* Q);
+};

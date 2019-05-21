@@ -44,4 +44,5 @@ public:
 	void Assembly(double* Matrix, unsigned int* LocationMatrix, size_t ND);
 
 	friend class CPARDISOSolver;
+	friend class CFEASTGVSolver;
 };
