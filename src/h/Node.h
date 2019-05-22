@@ -60,7 +60,7 @@ public:
 	void Write(COutputter& output, unsigned int np);
 
 //!	Output nodal point data to Tecplot stream
-	void Write(CTecOutputter& output, unsigned int PTYPE, unsigned int flag = 0, double* Displacement = nullptr);
+	void Write(CTecOutputter& output, unsigned int PTYPE, double scalar, unsigned int flag = 0, double* Displacement = nullptr);
 
 //!	Output equation numbers of nodal point to stream OutputFile
 	void WriteEquationNo(COutputter& OutputFile, unsigned int np);
