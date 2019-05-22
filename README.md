@@ -27,3 +27,4 @@ The project for the course 'Computational Dynamics'. This README.md is used to r
 ### Modification by Jia Sun
 #### date:2019/05/07
 1. Add element type: H8 (8 nodes). The number of this _ElementType for input is 4;
+2. H8.cpp has been modified.
