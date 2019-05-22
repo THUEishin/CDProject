@@ -73,6 +73,30 @@ bool CH8::Read(ifstream& Input, unsigned int Ele, CMaterial* MaterialSets, CNode
         nodes_[i]->Tec_flag = true;
     }
 
+	//!< Calculate nodal mass
+	double rho = ElementMaterial_->density_0;
+	//! two point Guass Quadrature
+	double GP[2], weight[2], Jacobi, SHP[8];
+	Guassian(2, GP, weight);
+	double B[6][24]; // No use here
+
+	for (int I = 0; I < 2; I++)
+	{
+		for (int J = 0; J < 2; J++)
+		{
+			for (int K = 0; K < 2; K++)
+			{
+				StrainMatrix(B, GP[I], GP[J], GP[K], Jacobi);
+				double Gmass = rho * weight[I] * weight[J] * weight[K] * abs(Jacobi); // we can get volumn by integrating the function: f(x)=1
+				// Expolate the mass from Gauss point to nodes
+				SHPFunction(SHP, GP[I], GP[J], GP[K]);
+				for (int i = 0; i < 8; i++)
+				{
+					nodes_[i]->mass += Gmass * SHP[i];
+				}
+			}
+		}
+	}
     return true;
 }
 
@@ -117,18 +141,8 @@ void CH8::ElementStiffness(double* Matrix)
     clear(Matrix, SizeOfStiffnessMatrix());
     int Ngauss=2;
     double WGS[2]= {1.0,1.0},XGS[2]= {-0.577350269189625,0.577350269189625};
-    double ks,yi,ph,wks,wyi,wph,xiN[8][3],detA;
+    double ks,yi,ph,wks,wyi,wph,detA;
     double Ke[24][24]= {0};
-    //读取节点
-    for(unsigned int N1=0; N1<8; N1++)
-    {
-        xiN[N1][0]=nodes_[N1]->XYZ[0];
-        xiN[N1][1]=nodes_[N1]->XYZ[1];
-        xiN[N1][2]=nodes_[N1]->XYZ[2];
-
-    }
-
-
     //对所有高斯点循环
     for ( int i1=0; i1<Ngauss; i1++)
     {
@@ -144,7 +158,7 @@ void CH8::ElementStiffness(double* Matrix)
                 wph=WGS[k1];
                 //初始化并计算应变阵
                 double B[6][24]= {0};
-                StrainMatrix(B, ks,yi, ph, detA,xiN);
+                StrainMatrix(B, ks,yi, ph, detA);
 
 
 
@@ -206,19 +220,10 @@ void CH8::ElementStress(double* stress, double* Displacement)
 
     int Ngauss=2;
     double WGS[2]= {1.0,1.0},XGS[2]= {-0.577350269189625,0.577350269189625};
-    double ks,yi,ph,wks,wyi,wph,xiN[8][3],detA;
+    double ks,yi,ph,wks,wyi,wph,detA;
     double Ke[24][24]= {0};
     //先将应力回0
     clear(stress, 48);
-
-    //读取节点
-    for(unsigned int N1=0; N1<8; N1++)
-    {
-        xiN[N1][0]=nodes_[N1]->XYZ[0];
-        xiN[N1][1]=nodes_[N1]->XYZ[1];
-        xiN[N1][2]=nodes_[N1]->XYZ[2];
-
-    }
 
     for ( int i1=0; i1<Ngauss; i1++)
     {
@@ -234,7 +239,7 @@ void CH8::ElementStress(double* stress, double* Displacement)
                 wph=WGS[k1];
                 //初始化并计算应变阵
                 double B[6][24]= {0};
-                StrainMatrix(B, ks,yi, ph, detA,xiN);
+                StrainMatrix(B, ks,yi, ph, detA);
 
 
 
@@ -325,9 +330,20 @@ void CH8::Constitutive(double Dmat[6][6])
     }
 }
 
+//! Return the shape function value of point with parent coordinate (xi, eta)
+void CH8::SHPFunction(double SHP[8], double R, double S , double T)
+{
+	SHP[0]=(1-R)*(1-S)*(1-T);
+	SHP[1]=(1+R)*(1-S)*(1-T);
+	SHP[2]=(1+R)*(1+S)*(1-T);
+	SHP[3]=(1-R)*(1+S)*(1-T);
+	SHP[4]=(1-R)*(1-S)*(1+T);
+	SHP[5]=(1+R)*(1-S)*(1+T);
+	SHP[6]=(1+R)*(1+S)*(1+T);
+	SHP[7]=(1-R)*(1+S)*(1+T);
+}
 
-
-void  CH8::StrainMatrix(double B[6][24], double ks, double yi, double ph, double& detA,double xiN[8][3])
+void  CH8::StrainMatrix(double B[6][24], double ks, double yi, double ph,double &detA)
 {
     /*按(-1,-1,-1),(1,-1,-1),(1,1,-1),(-1,1,-1),
     (-1,-1,1),(1,-1,1),(1,1,1),(-1,1,1)的顺序*/
@@ -378,13 +394,21 @@ void  CH8::StrainMatrix(double B[6][24], double ks, double yi, double ph, double
         {
             for( int N3=0; N3<8; N3++)
             {
-                dxdk[N1][N2]+=dndk[N3][N2]*xiN[N3][N1];
+                dxdk[N1][N2]+=dndk[N3][N2]*(nodes_[N3]->XYZ[N1]);
             }
         }
     }
     //下面对dxdk求逆
     detA=dxdk[0][0]*(dxdk[1][1]*dxdk[2][2]-dxdk[1][2]*dxdk[2][1])-dxdk[0][1]*(dxdk[1][0]*dxdk[2][2]-dxdk[1][2]*dxdk[2][0])+dxdk[0][2]*(dxdk[1][0]*dxdk[2][1]-dxdk[1][1]*dxdk[2][0]);
-    int k11,k12,k21,k22;
+    
+	if (detA == 0)
+	{
+		cout << "The Jacobi of an element equals zero!" << endl;
+		exit(1);
+	}
+	
+	
+	int k11,k12,k21,k22;
     for( int N1=0; N1<3; N1++)
     {
         for( int N2=0; N2<3; N2++)
