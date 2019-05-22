@@ -50,9 +50,9 @@ public:
 	//! Return the constitutive relation matrix of plain strain or stress
 	void Constitutive(double D[6][6]);
 
-	//! Return the derivative of the shape function value of point with parent coordinate (R, S, T)
-	//void DSHPFunction(double dndk[8][3], double ks, double yi,double ph);
+	//! Return the derivative of the shape function value of point with parent coordinate ( ks,  yi,  ph)
+	void SHPFunction(double SHP[8], double ks, double yi,double ph);
 
 	//! Return the strain matrix value of point with parent coordinate (xi, eta)
-	void StrainMatrix(double B[6][24], double ks, double yi, double ph, double& detA,double xiN[8][3]);
+	void StrainMatrix(double B[6][24], double ks, double yi, double ph, double& detA);
 };
