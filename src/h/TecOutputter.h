@@ -49,6 +49,9 @@ public:
 	//!	Output nodal point initial position data
 	void OutputResult(unsigned int flag, unsigned int lcase);
 
+	//! Output Eigenvector Module
+	void OutputEIGModule(double* Eigvectors, double* Eig, unsigned int Num_eig);
+
 	//! Overload the operator <<
 	template <typename T>
 	CTecOutputter& operator<<(const T& item)

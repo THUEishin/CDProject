@@ -64,7 +64,7 @@ void CNode::Write(COutputter& output, unsigned int np)
 }
 
 //	Output nodal point data to Tecplot stream
-void CNode::Write(CTecOutputter& output, unsigned int PTYPE, unsigned int flag,double* Displacement)
+void CNode::Write(CTecOutputter& output, unsigned int PTYPE, double scalar, unsigned int flag, double* Displacement)
 {
 	//! flag: 0-nodal position of Initial phase
 	//!       1-nodal position of initial phase after calculation
@@ -102,7 +102,7 @@ void CNode::Write(CTecOutputter& output, unsigned int PTYPE, unsigned int flag,d
 				exit(1);
 			}
 			
-			output << XYZ[0] + 1.0e7*UXYZ[0] << " " << XYZ[1] + 1.0e7*UXYZ[1] << " " << XYZ[2] + 1.0e7*UXYZ[2] << " ";
+			output << XYZ[0] + scalar*UXYZ[0] << " " << XYZ[1] + scalar *UXYZ[1] << " " << XYZ[2] + scalar *UXYZ[2] << " ";
 		}
 
 		for (unsigned int i = 0; i < NDF; i++) output<< UXYZ[i] << " ";
@@ -123,7 +123,7 @@ void CNode::Write(CTecOutputter& output, unsigned int PTYPE, unsigned int flag,d
 				exit(1);
 			}
 
-			output << XYZ[0] + UXYZ[0] << " " << XYZ[1] + UXYZ[1] << " ";
+			output << XYZ[0] + scalar *UXYZ[0] << " " << XYZ[1] + scalar *UXYZ[1] << " ";
 		}
 
 		for (unsigned int i = 0; i < 2; i++) output << UXYZ[i] << " ";

@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 		CFEASTGVSolver* Solver = new CFEASTGVSolver(FEMData->GetSparseStiffnessMatrix());
 		int NEQ = FEMData->GetNEQ();
 		double emin = 0.0;
-		double emax = 10000.0;
+		double emax = 100000.0;
 		int m0 = 10, m;
 		double* lambda = new double[m0];
 		double* res = new double[m0];
@@ -95,6 +95,7 @@ int main(int argc, char *argv[])
 			}
 			eig << endl;
 		}
+		TecOutput->OutputEIGModule(Q, lambda, m);
 		return 0;
 	}
 

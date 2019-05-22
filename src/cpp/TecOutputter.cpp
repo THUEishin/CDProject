@@ -82,7 +82,7 @@ void CTecOutputter::OutputInitInfo()
 	}
 
 	for (unsigned int np = 0; np < NUMNP; np++)
-		NodeList[np].Write(*this, PTYPE);
+		NodeList[np].Write(*this, PTYPE, 1.0);
 
 	for (unsigned int neg = 0; neg < NUMEG; neg++)
 	{
@@ -148,5 +148,44 @@ void CTecOutputter::OutputResult(unsigned int flag, unsigned int lcase)
 	}
 
 	for (unsigned int np = 0; np < NUMNP; np++)
-		NodeList[np].Write(*this, PTYPE, flag, Displacement);
+		NodeList[np].Write(*this, PTYPE, 1.0e7, flag, Displacement);
+}
+
+void CTecOutputter::OutputEIGModule(double* Eigvectors, double* Eig, unsigned int Num_eig)
+{
+	CDomain* FEMData = CDomain::Instance();
+
+	CNode* NodeList = FEMData->GetNodeList();
+
+	CElementGroup* EleGrpList = FEMData->GetEleGrpList();
+
+	unsigned int NUMNP = FEMData->GetNUMNP();
+	unsigned int PTYPE = FEMData->GetPTYPE();
+	unsigned int NUMEG = FEMData->GetNUMEG();
+	unsigned int NUMET = 0;
+
+	for (unsigned int N = 0; N < NUMEG; N++)
+	{
+		NUMET += EleGrpList[N].GetNUME();
+	}
+
+	unsigned int NEQ = FEMData->GetNEQ();
+
+	for (int m = 0; m < Num_eig; m++)
+	{
+		*this << "ZONE T=\"P_module_" << to_string(m + 1) << "_of_Eigenvalue_" << Eig[m] << "\", ";
+		*this << "F=FEPOINT, N=" << NUMTP << ", E=" << NUMET;
+		if (PTYPE)
+		{
+			*this << ", ET=BRICK, ";
+		}
+		else
+		{
+			*this << ", ET=QUADRILATERAL, ";
+		}
+		*this << "D=(FECONNECT)" << endl;
+
+		for (unsigned int np = 0; np < NUMNP; np++)
+			NodeList[np].Write(*this, PTYPE, 0.05, 2, Eigvectors + m * NEQ);
+	}
 }
