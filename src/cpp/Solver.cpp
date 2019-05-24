@@ -19,6 +19,7 @@
 #include "mkl_pardiso.h"
 #include "stdlib.h"
 #include <fstream>
+#include <iomanip>
 
 using namespace std;
 
@@ -181,7 +182,7 @@ void CPARDISOSolver::LDLT()
 // Solve displacement by back substitution
 void CPARDISOSolver::BackSubstitution(double* Force)
 {
-	double* dis = new double[NEQ];
+	double* dis = new double[NEQ*nrhs];
 //--------------------------------------------------------------------
 // Back substitution and iterative refinement
 //--------------------------------------------------------------------
@@ -197,7 +198,7 @@ void CPARDISOSolver::BackSubstitution(double* Force)
 	printf("\nSolve completed ... ");
 	printf("\nThe solution of the system is: ");
 
-	for (int i = 0; i < NEQ; i++)
+	for (int i = 0; i < NEQ*nrhs; i++)
 	{
 		Force[i] = dis[i];
 	}
@@ -268,4 +269,159 @@ void CFEASTGVSolver::Calculate_GV_FEAST(double emin, double emax, MKL_INT& m0, M
 		cout << "There is error in FEAST Solver. Error Code is " << info << endl;
 		exit(1);
 	}
+}
+
+CSUBSPACESolver::CSUBSPACESolver(CSparseMatrix* M, MKL_INT Num_eig)
+{
+	Pardiso = new CPARDISOSolver(M);
+	m0 = Num_eig;
+	NEQ = M->NEQ_;
+
+	_K = new double[m0*m0];
+
+	_M = new double[m0*m0];
+
+	Q = new double[NEQ*m0];
+	E = new double[m0];
+	X = new double[NEQ*m0];
+	Y1 = new double[NEQ*m0];
+	Y2 = new double[NEQ*m0];
+	e = new double[m0];
+
+	for (int i = 0; i < m0; i++)
+	{
+		for (int j = 0; j < NEQ; j++)
+		{
+			if (i == 0)
+			{
+				Q[j+i*NEQ] = 1.0;
+			}
+			else
+			{
+				if ((j + 1) == i)
+					Q[j+i*NEQ] = 1.0;
+				else
+					Q[j+i*NEQ] = 0.0;
+			}
+		}
+	}
+
+	for (int i = 0; i < m0; i++)
+	{
+		E[i] = 0.0;
+	}
+}
+
+void CSUBSPACESolver::Calculate_GV()
+{
+	CDomain* FEMData = CDomain::Instance();
+
+	int NUMNP = FEMData->GetNUMNP();
+	CNode* nodelist = FEMData->GetNodeList();
+
+	int NDF = CNode::NDF;
+	int bcode;
+	for (int i = 0; i < NUMNP; i++)
+	{
+		CNode* node = &nodelist[i];
+		for (int j = 0; j < NDF; j++)
+		{
+			bcode = node->bcode[j];
+			if (bcode > 0)
+			{
+				for (int k = 0; k < m0; k++)
+				{
+					Y1[k*NEQ + bcode - 1] = node->mass*Q[k*NEQ + bcode - 1];
+				}
+			}
+		}
+	}
+
+	double tol = 1.0e-5;
+	double error = 1.0;
+	MKL_INT info;
+	Pardiso->Set_NRHS(m0);
+	while (error > tol)
+	{
+		for (int i = 0; i < NEQ*m0; i++)
+			X[i] = Y1[i];
+
+		//! Calculate X by solve K*X = Y1
+		BackSubstitution(X);
+
+		//! Calculate Y2 by multiplying Y2 = M*X
+		for (int i = 0; i < NUMNP; i++)
+		{
+			CNode* node = &nodelist[i];
+			for (int j = 0; j < NDF; j++)
+			{
+				bcode = node->bcode[j];
+				if (bcode > 0)
+				{
+					for (int k = 0; k < m0; k++)
+					{
+						Y2[k*NEQ + bcode - 1] = node->mass*X[k*NEQ + bcode - 1];
+					}
+				}
+			}
+		}
+
+		//! Calculate _K by multiplying _K = X^T*Y1
+		//! Calculate _M by multiplying _M = X^T*Y2
+		clear(_K, m0*m0);
+		clear(_M, m0*m0);
+		for (int i = 0; i < m0; i++)
+		{
+			for (int j = 0; j < m0; j++)
+			{
+				for (int k = 0; k < NEQ; k++)
+				{
+					_K[i*m0+j] += X[i*NEQ + k] * Y1[j*NEQ + k];
+					_M[i*m0+j] += X[i*NEQ + k] * Y2[j*NEQ + k];
+				}
+			}
+		}
+
+		info = LAPACKE_dsygv(LAPACK_ROW_MAJOR, 1, 'V', 'U', m0, _K, m0, _M, m0, e);
+
+		error = 0;
+		
+		for (int i = 0; i < m0; i++)
+		{
+			error = max(error, abs(e[i] - E[i]) / e[i]);
+			E[i] = e[i];
+		}
+
+		clear(Y1, NEQ*m0);
+		for (int i = 0; i < m0; i++)
+		{
+			for (int j = 0; j < NEQ; j++)
+			{
+				for (int k = 0; k < m0; k++)
+				{
+					Y1[i*NEQ + j] += Y2[k*NEQ + j] * _K[k*m0 + i];
+				}
+			}
+		}
+	}
+
+	for (int i = 0; i < NEQ*m0; i++)
+		X[i] = Y1[i];
+
+	//! Calculate X by solve K*X = Y1
+	BackSubstitution(X);
+
+	for (int i = 0; i < m0; i++)
+	{
+		for (int j = 0; j < NEQ; j++)
+		{
+			for (int k = 0; k < m0; k++)
+			{
+				Q[i*NEQ + j] += X[k*NEQ + j] * _K[k*m0 + i];
+			}
+		}
+	}
+
+	Pardiso->Set_NRHS(1);
+	return;
 }

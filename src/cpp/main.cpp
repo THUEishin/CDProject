@@ -75,8 +75,8 @@ int main(int argc, char *argv[])
 		CFEASTGVSolver* Solver = new CFEASTGVSolver(FEMData->GetSparseStiffnessMatrix());
 		int NEQ = FEMData->GetNEQ();
 		double emin = 0.0;
-		double emax = 100000.0;
-		int m0 = 10, m;
+		double emax = 10000000.0;
+		int m0 = 40, m;
 		double* lambda = new double[m0];
 		double* res = new double[m0];
 		double* Q = new double[NEQ*m0];
@@ -100,13 +100,18 @@ int main(int argc, char *argv[])
 	}
 
 	CSolver* Solver;
-	if (FEMData->GetSTYPE())
+	if (FEMData->GetMODEX() == 2)
 	{
 		Solver = new CPARDISOSolver(FEMData->GetSparseStiffnessMatrix());
 	}
-	else
+	else if(FEMData->GetMODEX() == 1)
 	{
 		Solver = new CLDLTSolver(FEMData->GetStiffnessMatrix());
+	}
+	else if (FEMData->GetMODEX() == 3)
+	{
+		int Num_eig = 20;
+		Solver = new CSUBSPACESolver(FEMData->GetSparseStiffnessMatrix(), Num_eig);
 	}
     
 //  Perform L*D*L(T) factorization of stiffness matrix
@@ -117,7 +122,31 @@ int main(int argc, char *argv[])
 #ifdef _DEBUG_
     Output->PrintStiffnessMatrix();
 #endif
-        
+//! Calculate Eigenvalues and Eigenvectors
+	if (FEMData->GetMODEX() == 3)
+	{
+		int Num_eig = 20;
+		int NEQ = FEMData->GetNEQ();
+		Solver->Calculate_GV();
+		double* EigenV = Solver->GetEigenV();
+		double* Eigen = Solver->GetEigen();
+		ofstream eig;
+		eig.open(filename + ".eig");
+		eig << "The number of eigenvalue is " << Num_eig << endl;
+		for (int i = 0; i < Num_eig; i++)
+		{
+			eig << "Eigen Value " << i + 1 << " : " << Eigen[i] << endl;
+			eig << "The Eigen Vector is: " << endl;
+			for (int j = 0; j < NEQ; j++)
+			{
+				eig << EigenV[i*NEQ + j] << "    ";
+			}
+			eig << endl;
+		}
+		TecOutput->OutputEIGModule(EigenV, Eigen, Num_eig);
+		return 0;
+	}
+
 //  Loop over for all load cases
     for (unsigned int lcase = 0; lcase < FEMData->GetNLCASE(); lcase++)
     {

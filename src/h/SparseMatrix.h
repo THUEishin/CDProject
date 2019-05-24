@@ -45,4 +45,5 @@ public:
 
 	friend class CPARDISOSolver;
 	friend class CFEASTGVSolver;
+	friend class CSUBSPACESolver;
 };
