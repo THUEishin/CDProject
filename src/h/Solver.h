@@ -31,6 +31,13 @@ public:
 
 //! Release Additional memory
 	virtual void ReleasePhase() {}
+
+//! Calculate the first m0 Eigenvalues and their Eigenvectors
+	virtual void Calculate_GV() {};
+
+	virtual double* GetEigen() { return nullptr; }
+
+	virtual double* GetEigenV() { return nullptr; }
 };
 
 //!	LDLT solver: A in core solver using skyline storage  and column reduction scheme
@@ -88,6 +95,9 @@ public:
 
 //! Release Additional memory
 	virtual void ReleasePhase();
+
+//! Set value of nrhs
+	void Set_NRHS(MKL_INT num) { nrhs = num; }
 };
 
 //! Generalized Eigenvalue solver: A in core solver using sparse storage and MKL FEAST
@@ -114,4 +124,45 @@ public:
 	//! Calculate the eigenvalue in interval [emin, emax] with a guess of total number of eigenvalue: m0
 	//! m is actual number of eigenvalue in interval [emin, emax] and m should be smaller than m0
 	void Calculate_GV_FEAST(double emin, double emax, MKL_INT& m0, MKL_INT& m, double* lambda, double* res, double* Q);
+};
+
+//! Generalized Eigenvalue solver: A in core solver using sparse storage and subspace method
+class CSUBSPACESolver: public CSolver
+{
+public:
+	CPARDISOSolver* Pardiso;
+
+	MKL_INT NEQ;
+	MKL_INT m0;
+
+	double* _K;
+
+	double* _M;
+
+	double* Q;
+	double* E;
+	double* X;
+	double* Y1;
+	double* Y2;
+
+	double* e;
+
+public:
+	CSUBSPACESolver(CSparseMatrix* M, MKL_INT Num_eig);
+
+	//!	Perform L*D*L(T) factorization of the stiffness matrix
+	virtual void LDLT() { Pardiso->LDLT(); };
+
+	//!	Reduce right-hand-side load vector and back substitute
+	virtual void BackSubstitution(double* Force) { Pardiso->BackSubstitution(Force); };
+
+	//! Release Additional memory
+	virtual void ReleasePhase() { Pardiso->ReleasePhase(); }
+
+	//! Calculate the first m0 Eigenvalues and their Eigenvectors
+	virtual void Calculate_GV();
+
+	virtual double* GetEigen() { return E; }
+
+	virtual double* GetEigenV() { return Q; }
 };

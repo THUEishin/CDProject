@@ -16,6 +16,8 @@ The project for the course 'Computational Dynamics'. This README.md is used to r
 7. Add a Solver for eigenvalue calculation with MKL [dfeast_scsrgv](https://software.intel.com/en-us/mkl-developer-reference-c-feast-scsrgv-feast-hcsrgv) function.
 #### Date: 2019/5/22
 8. Add visualization module for eigenvalue and eigenvector in Tecplot
+#### Date: 2019/5/24
+9. Add SUBSPACE Eigen Solver
 
 ### Modification by Cong Chen
 #### Date:2019/4/28
