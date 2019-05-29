@@ -337,7 +337,7 @@ void CSUBSPACESolver::Calculate_GV()
 		}
 	}
 
-	double tol = 1.0e-5;
+	double tol = 1.0e-10;
 	double error = 1.0;
 	MKL_INT info;
 	Pardiso->Set_NRHS(m0);
@@ -405,12 +405,7 @@ void CSUBSPACESolver::Calculate_GV()
 		}
 	}
 
-	for (int i = 0; i < NEQ*m0; i++)
-		X[i] = Y1[i];
-
-	//! Calculate X by solve K*X = Y1
-	BackSubstitution(X);
-
+	clear(Q, NEQ*m0);
 	for (int i = 0; i < m0; i++)
 	{
 		for (int j = 0; j < NEQ; j++)
