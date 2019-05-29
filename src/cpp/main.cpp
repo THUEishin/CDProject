@@ -13,6 +13,7 @@
 #include "Outputter.h"
 #include "TecOutputter.h"
 #include "Clock.h"
+#include <iomanip>
 
 using namespace std;
 
@@ -75,8 +76,8 @@ int main(int argc, char *argv[])
 		CFEASTGVSolver* Solver = new CFEASTGVSolver(FEMData->GetSparseStiffnessMatrix());
 		int NEQ = FEMData->GetNEQ();
 		double emin = 0.0;
-		double emax = 10000000.0;
-		int m0 = 40, m;
+		double emax = 100000000.0;
+		int m0 = 5, m;
 		double* lambda = new double[m0];
 		double* res = new double[m0];
 		double* Q = new double[NEQ*m0];
@@ -84,6 +85,7 @@ int main(int argc, char *argv[])
 		Solver->Calculate_GV_FEAST(emin, emax, m0, m, lambda, res, Q);
 		ofstream eig;
 		eig.open(filename + ".eig");
+		eig << setiosflags(ios::scientific) << setprecision(10);
 		eig << "The number of eigenvalue between the interval [" << emin << ", " << emax << "] is " << m << endl;
 		for (int i = 0; i < m; i++)
 		{
@@ -110,7 +112,7 @@ int main(int argc, char *argv[])
 	}
 	else if (FEMData->GetMODEX() == 3)
 	{
-		int Num_eig = 20;
+		int Num_eig = 3;
 		Solver = new CSUBSPACESolver(FEMData->GetSparseStiffnessMatrix(), Num_eig);
 	}
     
@@ -125,13 +127,14 @@ int main(int argc, char *argv[])
 //! Calculate Eigenvalues and Eigenvectors
 	if (FEMData->GetMODEX() == 3)
 	{
-		int Num_eig = 20;
+		int Num_eig = 3;
 		int NEQ = FEMData->GetNEQ();
 		Solver->Calculate_GV();
 		double* EigenV = Solver->GetEigenV();
 		double* Eigen = Solver->GetEigen();
 		ofstream eig;
 		eig.open(filename + ".eig");
+		eig << setiosflags(ios::scientific) << setprecision(10);
 		eig << "The number of eigenvalue is " << Num_eig << endl;
 		for (int i = 0; i < Num_eig; i++)
 		{

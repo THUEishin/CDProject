@@ -148,7 +148,7 @@ void CTecOutputter::OutputResult(unsigned int flag, unsigned int lcase)
 	}
 
 	for (unsigned int np = 0; np < NUMNP; np++)
-		NodeList[np].Write(*this, PTYPE, 1.0e7, flag, Displacement);
+		NodeList[np].Write(*this, PTYPE, 10, flag, Displacement);
 }
 
 void CTecOutputter::OutputEIGModule(double* Eigvectors, double* Eig, unsigned int Num_eig)
