@@ -16,6 +16,7 @@
 #include "Bar.h"
 #include "Quad.h"
 #include "HexT.h"
+#include "T4.h"
 #include "H8.h"
 #include "Material.h"
 #include "Node.h"
@@ -28,7 +29,7 @@ enum ElementTypes
     UNDEFINED = 0,
     Bar,    // Bar element
     Q4,     // 4Q element
-    T3,     // 3T element
+    T4,     // 3T element
     H8,     // 8H element
 	H20,   // 20H element
     Beam,   // Beam element

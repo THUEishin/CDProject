@@ -173,6 +173,9 @@ void COutputter::OutputElementInfo()
 			case ElementTypes::H8:  //H8 element
 				PrintH8ElementData(EleGrp);
 				break;
+			case ElementTypes::T4:  //T4 element
+				PrintT4ElementData(EleGrp);
+				break;
 		}
 	}
 }
@@ -335,6 +338,44 @@ void COutputter::PrintH8ElementData(unsigned int EleGrp)
 	*this << endl;
 }
 
+void COutputter::PrintT4ElementData(unsigned int EleGrp)
+{
+	CDomain* FEMData = CDomain::Instance();
+
+	CElementGroup& ElementGroup = FEMData->GetEleGrpList()[EleGrp];
+	unsigned int NUMMAT = ElementGroup.GetNUMMAT();
+
+	*this << " M A T E R I A L   D E F I N I T I O N" << endl
+		<< endl;
+	*this << " NUMBER OF DIFFERENT SETS OF MATERIAL" << endl;
+	*this << " AND CROSS-SECTIONAL  CONSTANTS  . . . .( NPAR(3) ) . . =" << setw(5) << NUMMAT
+		<< endl
+		<< endl;
+
+	*this << "  SET       YOUNG'S      POISSON" << endl
+		<< " NUMBER     MODULUS        RATE" << endl
+		<< "               E              NU" << endl;
+
+	*this << setiosflags(ios::scientific) << setprecision(5);
+
+	//	Loop over for all property sets
+	for (unsigned int mset = 0; mset < NUMMAT; mset++)
+		ElementGroup.GetMaterial(mset).Write(*this, mset);
+
+	*this << endl
+		<< endl
+		<< " E L E M E N T   I N F O R M A T I O N" << endl;
+	*this << " ELEMENT     NODE     NODE     NODE     NODE          MATERIAL" << endl
+		<< " NUMBER-N      1        2        3        4            SET NUMBER" << endl;
+
+	unsigned int NUME = ElementGroup.GetNUME();
+
+	//	Loop over for all elements in group EleGrp
+	for (unsigned int Ele = 0; Ele < NUME; Ele++)
+		ElementGroup[Ele].Write(*this, Ele);
+
+	*this << endl;
+}
 
 //	Print load data
 void COutputter::OutputLoadInfo()
@@ -491,13 +532,23 @@ void COutputter::OutputNodalStress()
 				Element.ElementStress(stressHexT, Displacement);
 			}
 			break;
-			case ElementTypes::H8: //H8 element
+		case ElementTypes::H8: //H8 element
 			double stressH8[48];
 
 			for (unsigned int Ele = 0; Ele < NUME; Ele++)
 			{
 				CElement& Element = EleGrp[Ele];
 				Element.ElementStress(stressH8, Displacement);
+			}
+			break;
+		case ElementTypes::T4: //T4 element
+			//error
+			double stressT4[6];
+
+			for (unsigned int Ele = 0; Ele < NUME; Ele++)
+			{
+				CElement& Element = EleGrp[Ele];
+				Element.ElementStress(stressT4, Displacement);
 			}
 			break;
 		default: // Invalid element type

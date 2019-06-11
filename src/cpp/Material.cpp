@@ -114,3 +114,27 @@ void CH8Material::Write(COutputter& output, unsigned int mset)
 {
 	output << setw(5) << mset + 1 << setw(16) << E << setw(16) << Poisson << setw(16) << density_0 << endl;
 }
+
+bool CT4Material::Read(ifstream& Input, unsigned int mset)
+{
+	Input >> nset;	// Number of property set
+
+	if (nset != mset + 1)
+	{
+		cerr << "*** Error *** Material sets must be inputted in order !" << endl
+			<< "    Expected set : " << mset + 1 << endl
+			<< "    Provided set : " << nset << endl;
+
+		return false;
+	}
+
+	Input >> E >> Poisson >> density_0;	// Young's modulus and Poisson Rate
+
+	return true;
+}
+
+//	Write material data to Stream
+void CT4Material::Write(COutputter& output, unsigned int mset)
+{
+	output << setw(5) << mset + 1 << setw(16) << E << setw(16) << Poisson << setw(16) << density_0 << endl;
+}
