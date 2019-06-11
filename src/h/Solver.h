@@ -166,3 +166,41 @@ public:
 
 	virtual double* GetEigenV() { return Q; }
 };
+
+class CSUBSPACESolver_CG
+{
+protected:
+//! Stiffness Matrix
+	CSparseMatrix* SparseK;
+	 char transa;
+
+public:
+	MKL_INT NEQ;
+	MKL_INT m0;
+
+	double* _K;
+
+	double* _M;
+
+	double* Q;
+	double* E;
+	double* X;
+	double* Y1;
+	double* Y2;
+	
+	double* e;
+
+public:
+	CSUBSPACESolver_CG(CSparseMatrix* M, MKL_INT Num_eig);
+
+	//Perform CG method to solve Ax=b
+	void CGmethod(double *Y,double *X,double tol);
+
+	//
+	void CGSUBSPACEIteration();
+
+	virtual double* GetEigen() { return E; }
+
+	virtual double* GetEigenV() { return Q; }
+
+};

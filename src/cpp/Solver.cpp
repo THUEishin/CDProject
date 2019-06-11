@@ -420,3 +420,286 @@ void CSUBSPACESolver::Calculate_GV()
 	Pardiso->Set_NRHS(1);
 	return;
 }
+
+CSUBSPACESolver_CG::CSUBSPACESolver_CG(CSparseMatrix* M,MKL_INT Num_eig)
+{
+	//! Stiffness Matrix
+	SparseK=M;
+	transa='u';
+
+	m0 = Num_eig;
+	NEQ = SparseK->NEQ_;
+
+	_K = new double[m0*m0];
+
+	_M = new double[m0*m0];
+
+	Q = new double[NEQ*m0];
+	E = new double[m0];
+	X = new double[NEQ*m0];
+	Y1 = new double[NEQ*m0];
+	Y2 = new double[NEQ*m0];
+	e = new double[m0];
+
+
+	for (int i = 0; i < m0; i++)
+	{
+		for (int j = 0; j < NEQ; j++)
+		{
+			if (i == 0)
+			{
+				Q[j+i*NEQ] = 1.0;
+			}
+			else
+			{
+				if ((j + 1) == i)
+					Q[j+i*NEQ] = 1.0;
+				else
+					Q[j+i*NEQ] = 0.0;
+			}
+		}
+	}
+
+	for (int i = 0; i < m0; i++)
+	{
+		E[i] = 0.0;
+	}
+}
+
+void CSUBSPACESolver_CG::CGSUBSPACEIteration()
+{
+	CDomain* FEMData = CDomain::Instance();
+
+	int NUMNP = FEMData->GetNUMNP();
+	CNode* nodelist = FEMData->GetNodeList();
+
+	int NDF = CNode::NDF;
+	int bcode;
+	for (int i = 0; i < NUMNP; i++)
+	{
+		CNode* node = &nodelist[i];
+		for (int j = 0; j < NDF; j++)
+		{
+			bcode = node->bcode[j];
+			if (bcode > 0)
+			{
+				for (int k = 0; k < m0; k++)
+				{
+					Y1[k*NEQ + bcode - 1] = node->mass*Q[k*NEQ + bcode - 1];//Q为初始向量
+				}
+			}
+		}
+	}
+	double tolCG=1;//该值会被更新，每次迭代逐渐减小
+
+	double tol = 1.0e-10;
+	double error = 100.0;
+	MKL_INT info;
+	while (error > tol)
+	{
+		for (int i = 0; i < NEQ*m0; i++)
+			X[i] = Y1[i];
+
+		//! Calculate X by solve K*X = Y1
+		CGmethod(Y1,X,tolCG);
+		tolCG=max(tolCG/10,1.0E-12);
+		//! Calculate Y2 by multiplying Y2 = M*X
+		for (int i = 0; i < NUMNP; i++)
+		{
+			CNode* node = &nodelist[i];
+			for (int j = 0; j < NDF; j++)
+			{
+				bcode = node->bcode[j];
+				if (bcode > 0)
+				{
+					for (int k = 0; k < m0; k++)
+					{
+						Y2[k*NEQ + bcode - 1] = node->mass*X[k*NEQ + bcode - 1];
+					}
+				}
+			}
+		}
+
+		//! Calculate _K by multiplying _K = X^T*Y1
+		//! Calculate _M by multiplying _M = X^T*Y2
+		clear(_K, m0*m0);
+		clear(_M, m0*m0);
+		for (int i = 0; i < m0; i++)
+		{
+			for (int j = 0; j < m0; j++)
+			{
+				for (int k = 0; k < NEQ; k++)
+				{
+					_K[i*m0+j] += X[i*NEQ + k] * Y1[j*NEQ + k];
+					_M[i*m0+j] += X[i*NEQ + k] * Y2[j*NEQ + k];
+				}
+			}
+		}
+
+		info = LAPACKE_dsygv(LAPACK_ROW_MAJOR, 1, 'V', 'U', m0, _K, m0, _M, m0, e);
+
+		error = 0;
+		
+		for (int i = 0; i < m0; i++)
+		{
+			error = max(error, abs(e[i] - E[i]) / e[i]);
+			E[i] = e[i];
+		}
+
+		clear(Y1, NEQ*m0);
+		for (int i = 0; i < m0; i++)
+		{
+			for (int j = 0; j < NEQ; j++)
+			{
+				for (int k = 0; k < m0; k++)
+				{
+					Y1[i*NEQ + j] += Y2[k*NEQ + j] * _K[k*m0 + i];
+				}
+			}
+		}
+	}
+
+	clear(Q, NEQ*m0);
+	for (int i = 0; i < m0; i++)
+	{
+		for (int j = 0; j < NEQ; j++)
+		{
+			for (int k = 0; k < m0; k++)
+			{
+				Q[i*NEQ + j] += X[k*NEQ + j] * _K[k*m0 + i];
+			}
+		}
+	}
+
+	return;
+}
+
+
+void CSUBSPACESolver_CG::CGmethod(double *Y,double *X,double tol)
+{
+	double **r;
+	double **p;
+	double **z;
+	double **xi;
+	double **Dx;
+	r=new double*[m0];
+	for (int i=0;i<m0;i++)
+	{
+		r[i]=new double[NEQ];
+		clear(r[i],NEQ);
+	}
+
+	p=new double*[m0];
+	for (int i=0;i<m0;i++)
+	{
+		p[i]=new double[NEQ];
+		clear(p[i],NEQ);
+	}
+
+	z=new double*[m0];
+	for (int i=0;i<m0;i++)
+	{
+		z[i]=new double[NEQ];
+		clear(z[i],NEQ);
+	}
+
+	xi=new double*[m0];
+	for (int i=0;i<m0;i++)
+	{
+		xi[i]=new double[NEQ];
+		clear(xi[i],NEQ);
+	}
+
+	Dx=new double*[m0];
+	for (int i=0;i<m0;i++)
+	{
+		Dx[i]=new double[NEQ];
+		clear(Dx[i],NEQ);
+	}
+
+	for (int i=0;i<m0;i++)
+	{
+		for(int j=0;j<NEQ;j++)
+		{
+			xi[i][j]=X[i*NEQ+j];
+		}
+		mkl_dcsrsymv (&transa , &NEQ , SparseK->_K ,SparseK->_iK , SparseK->_jK , xi[i], z[i]);
+		for (int j=0;j<NEQ;j++)
+		{
+			z[i][j]=Y[j+i*NEQ]-z[i][j];
+		}
+	}
+
+	for (int i=0;i<m0;i++)
+	{
+		for(int j=0;j<NEQ;j++)
+		{
+			r[i][j]=z[i][j];
+			p[i][j]=z[i][j];
+
+		}
+	}
+
+	double error;
+	double* KP;
+	double PTKP;
+	double rTr0;
+	double rTr1;
+	double b;
+	double normD;
+	KP=new double[NEQ];
+
+		for(int i = 0; i < m0; i++)
+		{
+			error=2.0*abs(tol);
+				while(error>tol)
+				{
+				
+			mkl_dcsrsymv (&transa , &NEQ , SparseK->_K ,SparseK->_iK , SparseK->_jK , p[i] , KP );
+		
+			rTr0=0;
+			PTKP=0;
+			for (int j=0; j<NEQ;j++)
+			{
+				rTr0+=r[i][j]*r[i][j];
+				PTKP+=p[i][j]*KP[j];
+			}
+
+
+			for (int j=0; j<NEQ;j++)
+			{
+				Dx[i][j]+=rTr0/PTKP*p[i][j];
+				r[i][j]-=rTr0/PTKP*KP[j];
+			}
+
+			rTr1=0;
+			for (int j=0; j<NEQ;j++)
+			{
+				rTr1+=r[i][j]*r[i][j];
+			}
+
+			b=rTr1/rTr0;
+			for (int j=0;j<NEQ;j++)
+			{
+				p[i][j]=r[i][j]+b*p[i][j];
+			}
+
+			normD=0;
+			for (int j=0;j<NEQ;j++)
+			{
+				normD+=Dx[i][j]*Dx[i][j];
+			}
+
+			error=rTr1/normD;
+
+		}			
+	}
+
+	for (int i=0;i<m0;i++)
+	{
+		for(int j=0;j<NEQ;j++)
+		{
+			X[i*NEQ+j]+=Dx[i][j];
+		}
+	}
+}
