@@ -101,6 +101,33 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
+	if (FEMData->GetMODEX() == 5)
+	{
+		int Num_eig=8;
+		CSUBSPACESolver_CG* Solver = new CSUBSPACESolver_CG(FEMData->GetSparseStiffnessMatrix(),Num_eig);
+		int NEQ = FEMData->GetNEQ();
+		Solver->CGSUBSPACEIteration();
+		double* EigenV = Solver->GetEigenV();
+		double* Eigen = Solver->GetEigen();
+		ofstream eig;
+		eig.open(filename + ".eig");
+		eig << setiosflags(ios::scientific) << setprecision(10);
+		eig << "The number of eigenvalue is " << Num_eig << endl;
+		for (int i = 0; i < Num_eig; i++)
+		{
+			eig << "Eigen Value " << i + 1 << " : " << Eigen[i] << endl;
+			eig << "The Eigen Vector is: " << endl;
+			for (int j = 0; j < NEQ; j++)
+			{
+				eig << EigenV[i*NEQ + j] << "    ";
+			}
+			eig << endl;
+		}
+		TecOutput->OutputEIGModule(EigenV, Eigen, Num_eig);
+		return 0;
+	}
+
+
 	CSolver* Solver;
 	if (FEMData->GetMODEX() == 2)
 	{
@@ -112,7 +139,7 @@ int main(int argc, char *argv[])
 	}
 	else if (FEMData->GetMODEX() == 3)
 	{
-		int Num_eig = 3;
+		int Num_eig = 8;
 		Solver = new CSUBSPACESolver(FEMData->GetSparseStiffnessMatrix(), Num_eig);
 	}
     
@@ -127,7 +154,7 @@ int main(int argc, char *argv[])
 //! Calculate Eigenvalues and Eigenvectors
 	if (FEMData->GetMODEX() == 3)
 	{
-		int Num_eig = 3;
+		int Num_eig = 8;
 		int NEQ = FEMData->GetNEQ();
 		Solver->Calculate_GV();
 		double* EigenV = Solver->GetEigenV();

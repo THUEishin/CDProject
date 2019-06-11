@@ -123,7 +123,7 @@ bool CDomain::ReadData(string FileName, string OutFile)
 	Input >> NUMNP >> NUMEG >> NLCASE >> MODEX;
 
 	if (MODEX == 1) STYPE = 0;
-	else if(MODEX == 2 || MODEX == 3 || MODEX == 4) STYPE = 1;
+	else if(MODEX == 2 || MODEX == 3 || MODEX == 4||MODEX==5) STYPE = 1;
 
 //	Read nodal point data
 	if (ReadNodalPoints())

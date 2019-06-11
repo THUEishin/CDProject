@@ -181,7 +181,7 @@ void CH8::ElementStiffness(double* Matrix)
                 }
 
                 //计算通过高斯积分计算刚度阵
-                double WT=detA*WGS[i1]*WGS[j1]*WGS[k1];
+                double WT=abs(detA)*WGS[i1]*WGS[j1]*WGS[k1];
                 for(unsigned int N1=0; N1<24; N1++)
                 {
                     for(unsigned int N2=0; N2<24; N2++)

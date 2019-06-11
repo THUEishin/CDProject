@@ -186,6 +186,6 @@ void CTecOutputter::OutputEIGModule(double* Eigvectors, double* Eig, unsigned in
 		*this << "D=(FECONNECT)" << endl;
 
 		for (unsigned int np = 0; np < NUMNP; np++)
-			NodeList[np].Write(*this, PTYPE, 0.05, 2, Eigvectors + m * NEQ);
+			NodeList[np].Write(*this, PTYPE, 300, 2, Eigvectors + m * NEQ);
 	}
 }
